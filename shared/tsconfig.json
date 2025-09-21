@@ -9,7 +9,6 @@
 		// Output configuration
 		"declaration": true,
 		"outDir": "./dist",
-		"noEmit": false,
 
 		// Type checking
 		"strict": true,
