@@ -6,9 +6,10 @@ export type ApiResponse<T = void> = {
 export type ApiError = {
 	success: false;
 	error: string;
+	isFormError?: boolean;
 };
 
-export type FormValidationError = {
-	success: false;
-	errors: Record<string, string>;
-};
+// export type FormValidationError = {
+// 	success: false;
+// 	errors?: Record<string, string>;
+// };

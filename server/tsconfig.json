@@ -19,7 +19,13 @@
 
 		// Module resolution
 		"moduleResolution": "bundler",
-		"allowImportingTsExtensions": false
+		"allowImportingTsExtensions": false,
+
+		// Path resolution
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["./src/*"]
+		}
 	},
 	"include": ["src/**/*"],
 	"exclude": ["node_modules", "dist"]
