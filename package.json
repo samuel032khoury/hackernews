@@ -18,11 +18,11 @@
 		"build": "turbo build",
 		"build:client": "turbo build --filter=client",
 		"build:server": "turbo build --filter=server",
-		"lint": "biome lint .",
+		"lint": "biome check --write",
 		"type-check": "turbo type-check",
 		"test": "turbo test",
 		"postinstall": "turbo build --filter=shared --filter=server",
-		"format": "biome format . --write"
+		"format": "biome format --write"
 	},
 	"keywords": [
 		"bun",

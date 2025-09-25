@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import type { ApiResponse } from "shared/dist";
+import { HTTPException } from "hono/http-exception";
+import type { ApiError, ApiResponse } from "shared/src";
 
 export const app = new Hono()
 
@@ -18,5 +19,11 @@ export const app = new Hono()
 
 		return c.json(data, { status: 200 });
 	});
+
+// app.onError((err, c) => {
+// 	if (err instanceof HTTPException) {
+// 		const errResponse = err.res ?? c.json<ApiError>();
+// 	}
+// })
 
 export default app;
