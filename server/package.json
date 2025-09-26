@@ -8,6 +8,7 @@
 		"dev": "bun --watch run src/index.ts && tsc --watch"
 	},
 	"dependencies": {
+		"better-auth": "^1.3.18",
 		"drizzle-orm": "^0.44.5",
 		"hono": "^4.7.11",
 		"postgres": "^3.4.7",
