@@ -24,7 +24,9 @@
 		// Path resolution
 		"baseUrl": ".",
 		"paths": {
-			"@/*": ["./src/*"]
+			"@/*": ["./src/*"],
+			"@shared/*": ["../shared/src/*"],
+			"@client/*": ["../client/src/*"]
 		}
 	},
 	"include": ["src/**/*"],

@@ -1,7 +1,7 @@
+import type { ApiError, ApiResponse } from "@shared/types";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
-import type { ApiError, ApiResponse } from "shared/src";
 
 export const app = new Hono()
 
