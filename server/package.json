@@ -5,7 +5,10 @@
 	"types": "dist/index.d.ts",
 	"scripts": {
 		"build": "tsc",
-		"dev": "bun --watch run src/index.ts && tsc --watch"
+		"dev": "bun --watch run src/index.ts && tsc --watch",
+		"db:generate": "drizzle-kit generate",
+		"db:migrate": "drizzle-kit migrate",
+		"db:studio": "drizzle-kit studio"
 	},
 	"dependencies": {
 		"better-auth": "^1.3.18",

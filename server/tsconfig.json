@@ -22,7 +22,6 @@
 		"allowImportingTsExtensions": false,
 
 		// Path resolution
-		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./src/*"],
 			"@shared/*": ["../shared/src/*"],

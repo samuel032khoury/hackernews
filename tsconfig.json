@@ -9,7 +9,6 @@
 		"allowJs": true,
 
 		// Path resolution
-		"baseUrl": "./",
 		"paths": {
 			"@shared/*": ["./shared/src/*"],
 			"@server/*": ["./server/src/*"],
