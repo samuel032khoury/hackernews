@@ -9,7 +9,7 @@ services:
     ports:
       - "5434:5432"
     volumes:
-      - hackernews-volume:/var/lib/postgresql/data
+      - hackernews-data:/var/lib/postgresql:rw
     networks:
       - hackernews-network
 
@@ -19,5 +19,5 @@ networks:
     driver: bridge
 
 volumes:
-  hackernews-volume:
-    name: hackernews_volume
+  hackernews-data:
+    name: hackernews-data
