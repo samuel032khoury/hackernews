@@ -1,0 +1,23 @@
+meta {
+  name: Get Session
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://localhost:3000/api/auth/get-session
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Samuel Ji",
+    "email": "samuel.j0324@icloud.com",
+    "password": "nalylanmeUsja#34"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
