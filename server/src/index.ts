@@ -1,4 +1,4 @@
-import type { ApiError } from "@shared/types";
+import type { ApiError } from "@shared/index";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { HTTPException } from "hono/http-exception";
@@ -7,6 +7,9 @@ import { auth } from "@/lib/auth";
 export const app = new Hono()
 	.use(cors())
 	.basePath("/api")
+	.get("/hello", (c) => {
+		return c.json({ message: "Hello from the server!", success: true });
+	})
 	.on(["POST", "GET"], "/auth/**", (c) => auth.handler(c.req.raw))
 	.onError((err, c) => {
 		if (err instanceof HTTPException) {

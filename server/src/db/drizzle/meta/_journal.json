@@ -1,20 +1,20 @@
 {
-  "version": "7",
-  "dialect": "postgresql",
-  "entries": [
-    {
-      "idx": 0,
-      "version": "7",
-      "when": 1758926890479,
-      "tag": "0000_flat_blizzard",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1759710874212,
-      "tag": "0001_abnormal_celestials",
-      "breakpoints": true
-    }
-  ]
+	"version": "7",
+	"dialect": "postgresql",
+	"entries": [
+		{
+			"idx": 0,
+			"version": "7",
+			"when": 1758926890479,
+			"tag": "0000_flat_blizzard",
+			"breakpoints": true
+		},
+		{
+			"idx": 1,
+			"version": "7",
+			"when": 1759710874212,
+			"tag": "0001_abnormal_celestials",
+			"breakpoints": true
+		}
+	]
 }
