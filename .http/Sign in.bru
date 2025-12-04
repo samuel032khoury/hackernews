@@ -5,13 +5,9 @@ meta {
 }
 
 post {
-  url: http://localhost:3000/api/auth/sign-in/email?redirect=/
+  url: http://localhost:3000/api/auth/sign-in/email
   body: json
   auth: inherit
-}
-
-params:query {
-  redirect: /
 }
 
 headers {
