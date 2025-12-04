@@ -1,13 +1,21 @@
 meta {
-  name: Sign Up
+  name: Sign in
   type: http
-  seq: 2
+  seq: 6
 }
 
 post {
-  url: http://localhost:3000/api/auth/sign-up/email
+  url: http://localhost:3000/api/auth/sign-in/email?redirect=/
   body: json
   auth: inherit
+}
+
+params:query {
+  redirect: /
+}
+
+headers {
+  Origin: http://localhost:3000
 }
 
 body:json {
