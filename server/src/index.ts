@@ -6,11 +6,8 @@ import { authRoutes } from "@/routes/auth";
 import { postRouter } from "@/routes/posts";
 import { testRouter } from "@/routes/test";
 
-const app = new Hono();
-
-app
+const app = new Hono()
 	.use(cors(), authHandler)
-	.basePath("/api")
 	.route("/auth", authRoutes)
 	.route("/posts", postRouter)
 	.route("/hello", testRouter)
