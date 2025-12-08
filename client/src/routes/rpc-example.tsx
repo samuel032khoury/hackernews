@@ -1,8 +1,8 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { api } from "@/lib/api";
 
 export const Route = createFileRoute("/rpc-example")({
 	component: RpcExample,
@@ -119,10 +119,16 @@ const res = await api.posts.$post({
 const data = await res.json();`}
 				</pre>
 
-				<form onSubmit={handleSubmit} className="space-y-3 p-3 bg-white rounded border">
+				<form
+					onSubmit={handleSubmit}
+					className="space-y-3 p-3 bg-white rounded border"
+				>
 					<div>
-						<label className="block text-sm font-medium mb-1">Title *</label>
+						<label className="block text-sm font-medium mb-1" htmlFor="title">
+							Title *
+						</label>
 						<input
+							id="title"
 							type="text"
 							value={title}
 							onChange={(e) => setTitle(e.target.value)}
@@ -132,8 +138,11 @@ const data = await res.json();`}
 						/>
 					</div>
 					<div>
-						<label className="block text-sm font-medium mb-1">URL</label>
+						<label className="block text-sm font-medium mb-1" htmlFor="url">
+							URL
+						</label>
 						<input
+							id="url"
 							type="url"
 							value={url}
 							onChange={(e) => setUrl(e.target.value)}
@@ -142,8 +151,11 @@ const data = await res.json();`}
 						/>
 					</div>
 					<div>
-						<label className="block text-sm font-medium mb-1">Content</label>
+						<label className="block text-sm font-medium mb-1" htmlFor="content">
+							Content
+						</label>
 						<textarea
+							id="content"
 							value={content}
 							onChange={(e) => setContent(e.target.value)}
 							className="w-full p-2 border rounded"

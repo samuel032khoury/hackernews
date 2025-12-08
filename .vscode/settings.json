@@ -1,3 +1,16 @@
 {
-	"cSpell.words": ["hackernews", "upvotes"]
+	"cSpell.words": ["hackernews", "upvotes"],
+	"sqltools.connections": [
+		{
+			"ssh": "Disabled",
+			"previewLimit": 50,
+			"server": "localhost",
+			"port": 5434,
+			"askForPassword": true,
+			"driver": "PostgreSQL",
+			"name": "hackernewsdb",
+			"database": "hackernewsdb",
+			"username": "user"
+		}
+	]
 }

@@ -52,4 +52,3 @@ export const postRouter = new Hono<AuthEnv>()
 			},
 		});
 	});
-

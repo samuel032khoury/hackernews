@@ -1,19 +1,18 @@
 import { useMutation } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
+import { api } from "@/lib/api";
 
 export const Route = createFileRoute("/")({
 	component: Index,
 });
 
 // Response type is inferred from the Hono RPC client
-type HelloResponse = Awaited<
-	ReturnType<typeof api.hello.$get>
-> extends Response
-	? Awaited<ReturnType<Awaited<ReturnType<typeof api.hello.$get>>["json"]>>
-	: never;
+type HelloResponse =
+	Awaited<ReturnType<typeof api.hello.$get>> extends Response
+		? Awaited<ReturnType<Awaited<ReturnType<typeof api.hello.$get>>["json"]>>
+		: never;
 
 function Index() {
 	const [data, setData] = useState<HelloResponse | undefined>();
@@ -40,8 +39,7 @@ function Index() {
 			<div className="flex flex-col items-center gap-4">
 				<h1 className="text-2xl font-bold">Hono RPC Example</h1>
 				<p className="text-gray-600 text-sm">
-					Click the button below to call the API using the typed Hono RPC
-					client
+					Click the button below to call the API using the typed Hono RPC client
 				</p>
 				<Button onClick={() => sendRequest()} disabled={isPending}>
 					{isPending ? "Loading..." : "Call API"}
