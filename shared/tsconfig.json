@@ -8,6 +8,10 @@
 
 		// Output configuration
 		"declaration": true,
+		"declarationMap": true,
+		"composite": true,
+		"noEmit": false,
+		"allowImportingTsExtensions": false,
 		"outDir": "./dist",
 
 		// Type checking
