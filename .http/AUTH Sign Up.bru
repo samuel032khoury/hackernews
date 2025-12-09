@@ -1,17 +1,13 @@
 meta {
-  name: Sign Out
+  name: AUTH Sign Up
   type: http
-  seq: 4
+  seq: 2
 }
 
 post {
-  url: http://localhost:3000/api/auth/sign-out
+  url: http://localhost:3000/auth/sign-up/email
   body: json
   auth: inherit
-}
-
-headers {
-  Origin: http://localhost:3000
 }
 
 body:json {

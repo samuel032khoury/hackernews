@@ -1,7 +1,7 @@
 import { createMiddleware } from "hono/factory";
-import type { AuthEnv } from "@/lib/auth";
+import type { AppEnv } from "@/lib/env";
 
-const requireAuth = createMiddleware<AuthEnv>(async (c, next) => {
+const requireAuth = createMiddleware<AppEnv>(async (c, next) => {
 	const user = c.get("user");
 	if (!user) {
 		return c.json({ error: "Unauthorized" }, 401);

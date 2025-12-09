@@ -1,0 +1,24 @@
+meta {
+  name: POST Posts
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:3000/posts
+  body: multipartForm
+  auth: none
+}
+
+body:json {
+  {
+    "title": "NEW TITLE",
+    "url": "https://example.com"
+  }
+}
+
+body:multipart-form {
+  title: NEW TITLE
+  content: TEXT CONTENT
+  url: http://www.baidu.com
+}
