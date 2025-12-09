@@ -22,6 +22,10 @@
 		"type-check": "turbo type-check",
 		"test": "turbo test"
 	},
+	"dependencies": {
+		"hono": "^4.7.11",
+		"better-auth": "^1.3.18"
+	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.2.5",
 		"bun-types": "latest",
