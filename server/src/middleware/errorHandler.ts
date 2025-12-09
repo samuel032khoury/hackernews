@@ -11,8 +11,7 @@ export const handleError = (err: Error, c: Context) => {
 				error: {
 					name: "ValidationError",
 					issues: err.issues.map((i) => ({
-						path: i.path,
-						message: i.message,
+						...i,
 					})),
 				},
 				isFormError: true,

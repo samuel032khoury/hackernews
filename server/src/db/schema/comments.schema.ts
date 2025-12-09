@@ -1,6 +1,6 @@
 import { relations } from "drizzle-orm";
 import { integer, pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
-import { user } from "./auth.schema";
+import { users } from "./auth.schema";
 import { posts } from "./posts.schema";
 import { commentUpvotes } from "./upvotes.schema";
 
@@ -19,9 +19,9 @@ export const comments = pgTable("comments", {
 });
 
 export const commentRelations = relations(comments, ({ one, many }) => ({
-	author: one(user, {
+	author: one(users, {
 		fields: [comments.userId],
-		references: [user.id],
+		references: [users.id],
 		relationName: "author",
 	}),
 	parentComment: one(comments, {

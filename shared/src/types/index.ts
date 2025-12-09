@@ -3,9 +3,9 @@ export type ApiResponse<T = void> = {
 	message: string;
 } & (T extends void ? object : { data: T });
 
-export type ValidationError = {
+type ValidationError = {
 	name: "ValidationError";
-	issues: { path: PropertyKey[]; message: string }[];
+	issues: object[];
 };
 
 export type ApiError = {
