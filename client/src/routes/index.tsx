@@ -21,9 +21,9 @@ function Index() {
 	}, []);
 
 	return (
-		<div className="max-w-xl mx-auto flex flex-col gap-6 items-center justify-center min-h-screen">
+		<div className="mx-auto flex min-h-screen max-w-xl flex-col items-center justify-center gap-6">
 			<div className="flex flex-col items-center gap-4">
-				<h1 className="text-2xl font-bold">{title ?? "Loading..."}</h1>
+				<h1 className="font-bold text-2xl">{title ?? "Loading..."}</h1>
 			</div>
 		</div>
 	);
