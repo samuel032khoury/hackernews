@@ -90,6 +90,9 @@
 			],
 			"outputs": ["coverage/**", ".nyc_output/**", "test-results/**"],
 			"env": ["NODE_ENV", "CI"]
+		},
+		"clean": {
+			"cache": false
 		}
 	},
 	"globalDependencies": [

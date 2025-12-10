@@ -18,7 +18,8 @@
 		"dev": "bun --watch run src/index.ts && tsc --watch",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
-		"db:studio": "drizzle-kit studio"
+		"db:studio": "drizzle-kit studio",
+		"clean": "rm -rf dist .turbo"
 	},
 	"dependencies": {
 		"@hono/zod-validator": "^0.7.5",
