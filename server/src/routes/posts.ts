@@ -23,7 +23,7 @@ import requireAuth from "@/middleware/requireAuth";
 import { throwOnError } from "@/validators";
 import { createCommentSchema } from "@/validators/comments.validation";
 import { createPostSchema } from "@/validators/posts.validation";
-import { querySchema } from "@/validators/query.validation";
+import { paginationSchema } from "@/validators/query.validation";
 
 const protectedRoutes = new Hono<ProtectedEnv>()
 	.post(
@@ -159,7 +159,7 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 	);
 
 const publicRoutes = new Hono<AppEnv>()
-	.get("/", zValidator("query", querySchema, throwOnError), async (c) => {
+	.get("/", zValidator("query", paginationSchema, throwOnError), async (c) => {
 		const { limit, page, sortBy, order, author, site } = c.req.valid("query");
 		const user = c.get("user");
 		const offset = (page - 1) * limit;
@@ -225,7 +225,9 @@ const publicRoutes = new Hono<AppEnv>()
 		zValidator("param", z.object({ id: z.coerce.number() }), throwOnError),
 		zValidator(
 			"query",
-			querySchema.extend({ includeChildren: z.coerce.boolean().optional() }),
+			paginationSchema.extend({
+				includeChildren: z.coerce.boolean().optional(),
+			}),
 			throwOnError,
 		),
 		async (c) => {

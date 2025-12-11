@@ -1,18 +1,77 @@
 import { zValidator } from "@hono/zod-validator";
-import type { ApiResponse, Comment } from "@shared/types";
-import { and, eq, sql } from "drizzle-orm";
+import type { ApiResponse, Comment, PaginatedResponse } from "@shared/types";
+import { and, asc, countDistinct, desc, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
 import z from "zod";
 import { db } from "@/db";
 import { comments, commentUpvotes, posts, users } from "@/db/schema";
-import type { ProtectedEnv } from "@/lib/env";
+import type { AppEnv, ProtectedEnv } from "@/lib/env";
 import { getISOFormatDateQuery } from "@/lib/utils";
 import requireAuth from "@/middleware/requireAuth";
 import { throwOnError } from "@/validators";
 import { createCommentSchema } from "@/validators/comments.validation";
+import { paginationSchema } from "@/validators/query.validation";
 
-export const commentRouter = new Hono<ProtectedEnv>()
+const publicRoutes = new Hono<AppEnv>().get(
+	"/:id/comments",
+	zValidator(
+		"param",
+		z.object({
+			id: z.coerce.number(),
+		}),
+		throwOnError,
+	),
+	zValidator("query", paginationSchema, throwOnError),
+	async (c) => {
+		const { id } = c.req.valid("param");
+		const user = c.get("user");
+		const { limit, page, sortBy, order } = c.req.valid("query");
+		const offset = (page - 1) * limit;
+		const sortByColumn =
+			sortBy === "points" ? comments.points : comments.createdAt;
+		const sortOrder = order === "desc" ? desc(sortByColumn) : asc(sortByColumn);
+		const [count] = await db
+			.select({ count: countDistinct(comments.id) })
+			.from(comments)
+			.where(eq(comments.parentCommentId, id));
+		const result = await db.query.comments.findMany({
+			where: eq(comments.parentCommentId, id),
+			orderBy: sortOrder,
+			limit,
+			offset,
+			with: {
+				author: {
+					columns: {
+						id: true,
+						name: true,
+					},
+				},
+				commentUpvotes: {
+					columns: {
+						userId: true,
+					},
+					where: eq(commentUpvotes.userId, user?.id ?? ""),
+					limit: 1,
+				},
+			},
+			extras: {
+				createdAt: getISOFormatDateQuery(comments.createdAt).as("created_at"),
+			},
+		});
+		return c.json<PaginatedResponse<Comment[]>>({
+			success: true,
+			message: "Fetched comments",
+			pagination: {
+				page,
+				totalPages: Math.ceil(count.count / limit),
+			},
+			data: result satisfies Comment[],
+		});
+	},
+);
+
+const protectedRoutes = new Hono<ProtectedEnv>()
 	.post(
 		"/:id",
 		requireAuth,
@@ -163,3 +222,7 @@ export const commentRouter = new Hono<ProtectedEnv>()
 			);
 		},
 	);
+
+export const commentRouter = new Hono()
+	.route("/", protectedRoutes)
+	.route("/", publicRoutes);
