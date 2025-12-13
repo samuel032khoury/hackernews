@@ -1,7 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { MenuIcon } from "lucide-react";
 import { Button } from "./ui/button";
-import { Sheet, SheetTrigger } from "./ui/sheet";
+import {
+	Sheet,
+	SheetContent,
+	SheetDescription,
+	SheetHeader,
+	SheetTitle,
+	SheetTrigger,
+} from "./ui/sheet";
 
 export function Header() {
 	return (
@@ -29,6 +36,25 @@ export function Header() {
 							<MenuIcon className="size-6" />
 						</Button>
 					</SheetTrigger>
+					<SheetContent className="mb-2">
+						<SheetHeader>
+							<SheetTitle>HackerNews</SheetTitle>
+							<SheetDescription className="sr-only">
+								Navigation
+							</SheetDescription>
+						</SheetHeader>
+						<nav className="flex flex-col space-y-4 px-4">
+							<Link to="/" className="hover:underline">
+								new
+							</Link>
+							<Link to="/" className="hover:underline">
+								top
+							</Link>
+							<Link to="/" className="hover:underline">
+								submit
+							</Link>
+						</nav>
+					</SheetContent>
 				</Sheet>
 			</div>
 		</header>
