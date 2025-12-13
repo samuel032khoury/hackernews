@@ -5,7 +5,5 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-	throw new Error("Test error");
-
 	return <div>Hello world</div>;
 }
