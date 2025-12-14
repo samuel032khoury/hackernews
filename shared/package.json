@@ -1,11 +1,11 @@
 {
 	"name": "shared",
 	"version": "0.1.0",
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
+	"main": "src/index.js",
+	"types": "src/index.d.ts",
 	"scripts": {
 		"build": "tsc",
-		"dev": "tsc --watch",
+		"dev": "tsc --watch --noEmit",
 		"clean": "rm -rf dist .turbo"
 	}
 }

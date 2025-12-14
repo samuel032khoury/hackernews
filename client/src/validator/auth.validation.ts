@@ -8,7 +8,7 @@ export const authSchema = z.object({
 		.max(255, { error: "Password is too long" }),
 });
 
-export const signupSchema = authSchema
+export const signUpSchema = authSchema
 	.extend({
 		name: z
 			.string()

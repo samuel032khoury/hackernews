@@ -1,20 +1,18 @@
-import type { ApiError } from "@shared/index";
+import type { ApiError, ValidationError } from "@shared/index";
 import type { Context } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { ZodError } from "zod";
 
 export const handleError = (err: Error, c: Context) => {
 	if (err instanceof ZodError) {
-		return c.json<ApiError>(
+		return c.json<ValidationError>(
 			{
 				success: false,
-				error: {
-					name: "ValidationError",
-					issues: err.issues.map((i) => ({
-						...i,
-					})),
-				},
-				isFormError: true,
+				code: "VALIDATION_ERROR",
+				issues: err.issues.map((issue) => ({
+					path: issue.path,
+					message: issue.message,
+				})),
 			},
 			400,
 		);
@@ -25,8 +23,7 @@ export const handleError = (err: Error, c: Context) => {
 			c.json<ApiError>(
 				{
 					success: false,
-					error: err.message,
-					isFormError: err.status === 422,
+					message: err.message,
 				},
 				err.status,
 			);
@@ -36,7 +33,7 @@ export const handleError = (err: Error, c: Context) => {
 	return c.json<ApiError>(
 		{
 			success: false,
-			error:
+			message:
 				process.env.NODE_ENV === "development"
 					? (err.stack ?? err.message)
 					: "Internal Server Error",

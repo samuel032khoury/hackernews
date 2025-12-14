@@ -6,8 +6,8 @@ import "./index.css";
 
 const queryClient = new QueryClient();
 
-import { ErrorComponent } from "./components/error";
-import { NotFoundComponent } from "./components/notFound";
+import { ErrorComponent } from "./components/errorComponent";
+import { NotFoundComponent } from "./components/notFoundComponent";
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
 

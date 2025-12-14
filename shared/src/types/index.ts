@@ -10,16 +10,24 @@ export type PaginatedResponse<T> = ApiResponse<T> & {
 	};
 };
 
-type ValidationError = {
-	name: "ValidationError";
-	issues: object[];
+export type ValidationIssue = {
+	path: PropertyKey[];
+	message: string;
+};
+
+export type ValidationError = {
+	success: false;
+	code: "VALIDATION_ERROR";
+	issues: ValidationIssue[];
 };
 
 export type ApiError = {
 	success: false;
-	error: string | ValidationError;
-	isFormError?: boolean;
+	message: string;
+	code?: string;
 };
+
+export type AppError = ApiError | ValidationError;
 
 export interface Comment {
 	id: number;

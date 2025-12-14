@@ -1,3 +1,4 @@
+import type { ApiError } from "@shared/index";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Eye, EyeOff } from "lucide-react";
@@ -14,16 +15,36 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SignUpError, signUp } from "@/lib/auth-client";
-import { signupSchema } from "@/validator/auth.validation";
+import { authClient } from "@/lib/auth-client";
+import { signUpSchema } from "@/validator/auth.validation";
 import { urlRedirectSchema } from "@/validator/url.validation";
 
 export const Route = createFileRoute("/signup")({
-	component: Signup,
+	component: SignUp,
 	validateSearch: urlRedirectSchema,
 });
 
-function Signup() {
+const signUp = async ({
+	name,
+	email,
+	password,
+}: {
+	name: string;
+	email: string;
+	password: string;
+}) => {
+	const res = await authClient.signUp.email({ name, email, password });
+	if (res.error || !res.data) {
+		return {
+			success: false,
+			message: res.error?.message ?? "Sign up failed",
+			code: res.error?.code,
+		} satisfies ApiError;
+	}
+	return { success: true, data: res.data };
+};
+
+function SignUp() {
 	const search = Route.useSearch();
 	const navigate = useNavigate();
 	const [showPassword, setShowPassword] = useState(false);
@@ -35,36 +56,35 @@ function Signup() {
 			confirmPassword: "",
 		},
 		validators: {
-			onChange: signupSchema,
+			onChange: signUpSchema,
 		},
 		onSubmit: async ({ value }) => {
-			try {
-				await signUp({
-					name: value.name,
-					email: value.email,
-					password: value.password,
-				});
+			const result = await signUp({
+				name: value.name,
+				email: value.email,
+				password: value.password,
+			});
+
+			if (result.success) {
 				navigate({ to: search.redirect });
-			} catch (error) {
-				if (
-					error instanceof SignUpError &&
-					error.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL"
-				) {
-					form.setFieldMeta("email", (prev) => ({
-						...prev,
-						errorMap: {
-							onSubmit: "This email is already registered",
-						},
-					}));
-					return;
-				}
+				return;
+			}
+
+			if (result.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
+				form.setFieldMeta("email", (prev) => ({
+					...prev,
+					errorMap: {
+						onSubmit: "This email is already registered",
+					},
+				}));
+			} else {
 				toast.error("Sign up failed", {
-					description:
-						error instanceof Error ? error.message : "An error occurred",
+					description: result.message,
 				});
 			}
 		},
 	});
+
 	return (
 		<div className="w-full">
 			<Card className="mx-auto mt-12 max-w-sm border-border/25">
