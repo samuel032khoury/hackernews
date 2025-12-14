@@ -1,7 +1,7 @@
 import type { ApiError } from "@shared/types";
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -247,6 +247,16 @@ function SignUp() {
 										</Button>
 									)}
 								</form.Subscribe>
+								<p className="mt-2 text-center text-muted-foreground text-sm">
+									Already have an account?{" "}
+									<Link
+										to="/login"
+										search={{ redirect: search.redirect }}
+										className="text-primary underline hover:text-primary/80"
+									>
+										Log in
+									</Link>
+								</p>
 							</div>
 						</CardContent>
 					</CardHeader>
