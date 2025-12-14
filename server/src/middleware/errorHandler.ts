@@ -1,4 +1,4 @@
-import type { ApiError, ValidationError } from "@shared/index";
+import type { ApiError, ValidationError } from "@shared/types";
 import type { Context } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { ZodError } from "zod";

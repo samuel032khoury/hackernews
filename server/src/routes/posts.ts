@@ -4,7 +4,7 @@ import type {
 	Comment,
 	PaginatedResponse,
 	Post,
-} from "@shared/index";
+} from "@shared/types";
 import { and, asc, countDistinct, desc, eq, isNull, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";

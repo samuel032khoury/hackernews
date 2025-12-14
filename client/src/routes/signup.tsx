@@ -1,4 +1,4 @@
-import type { ApiError } from "@shared/index";
+import type { ApiError } from "@shared/types";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Eye, EyeOff } from "lucide-react";
