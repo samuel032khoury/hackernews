@@ -78,6 +78,7 @@ function SignUp() {
 
 			if (result.success) {
 				queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+				toast.success("Account created successfully");
 				navigate({ to: search.redirect });
 				return;
 			}
@@ -97,7 +98,6 @@ function SignUp() {
 					},
 				}));
 			} else {
-				console.log(result.code);
 				toast.error("Sign up failed", {
 					description: result.message,
 				});
