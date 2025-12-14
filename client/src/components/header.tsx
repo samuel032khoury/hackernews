@@ -67,49 +67,63 @@ export function Header() {
 						</nav>
 					)}
 				</div>
-				{!isAuthPage && (
-					<>
-						<div className="hidden items-center space-x-4 md:flex">
-							<UserControls
-								currentUser={currentUser}
-								onLogout={handleLogout}
-								variant="desktop"
-							/>
-						</div>
-						<Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-							<SheetTrigger asChild>
-								<Button variant="secondary" size="icon" className="md:hidden">
-									<MenuIcon className="size-6" />
-								</Button>
-							</SheetTrigger>
-							<SheetContent className="mb-2">
-								<SheetHeader>
-									<SheetTitle>HackerNews</SheetTitle>
-									<SheetDescription className="sr-only">
-										Navigation
-									</SheetDescription>
-								</SheetHeader>
-								<nav className="flex flex-col space-y-4 px-4">
-									<Link to="/" className="hover:underline" onClick={closeSheet}>
-										New
-									</Link>
-									<Link to="/" className="hover:underline" onClick={closeSheet}>
-										Top
-									</Link>
-									<Link to="/" className="hover:underline" onClick={closeSheet}>
-										Submit
-									</Link>
-									<UserControls
-										currentUser={currentUser}
-										onLogout={handleLogout}
-										onNavigate={closeSheet}
-										variant="mobile"
-									/>
-								</nav>
-							</SheetContent>
-						</Sheet>
-					</>
-				)}
+				<div>
+					{!isAuthPage && (
+						<>
+							<div className="hidden items-center space-x-4 md:flex">
+								<UserControls
+									currentUser={currentUser}
+									onLogout={handleLogout}
+									variant="desktop"
+								/>
+							</div>
+							<Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+								<SheetTrigger asChild>
+									<Button variant="secondary" size="icon" className="md:hidden">
+										<MenuIcon className="size-6" />
+									</Button>
+								</SheetTrigger>
+								<SheetContent className="mb-2">
+									<SheetHeader>
+										<SheetTitle>HackerNews</SheetTitle>
+										<SheetDescription className="sr-only">
+											Navigation
+										</SheetDescription>
+									</SheetHeader>
+									<nav className="flex flex-col space-y-4 px-4">
+										<Link
+											to="/"
+											className="hover:underline"
+											onClick={closeSheet}
+										>
+											New
+										</Link>
+										<Link
+											to="/"
+											className="hover:underline"
+											onClick={closeSheet}
+										>
+											Top
+										</Link>
+										<Link
+											to="/"
+											className="hover:underline"
+											onClick={closeSheet}
+										>
+											Submit
+										</Link>
+										<UserControls
+											currentUser={currentUser}
+											onLogout={handleLogout}
+											onNavigate={closeSheet}
+											variant="mobile"
+										/>
+									</nav>
+								</SheetContent>
+							</Sheet>
+						</>
+					)}
+				</div>
 			</div>
 		</header>
 	);
