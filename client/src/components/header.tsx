@@ -2,6 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { MenuIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { currentUserQueryOptions } from "@/services/current-user";
 import { Button } from "./ui/button";
@@ -28,6 +29,7 @@ export function Header() {
 	const handleLogout = async () => {
 		await authClient.signOut();
 		await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+		toast.success("Logged out successfully");
 		navigate({ to: "/" });
 	};
 
