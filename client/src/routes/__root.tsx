@@ -1,6 +1,7 @@
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { Toaster } from "sonner";
 import { Header } from "@/components/header";
 
 export const Route = createRootRoute({
@@ -17,6 +18,7 @@ export const Route = createRootRoute({
 					</p>
 				</footer>
 			</div>
+			<Toaster />
 			<TanStackRouterDevtools />
 			<ReactQueryDevtools />
 		</>
