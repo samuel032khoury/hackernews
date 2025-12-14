@@ -31,7 +31,7 @@ export const signUpSchema = z
 		path: ["confirmPassword"],
 	});
 
-export const signInSchema = z.object({
-	identifier: z.string().nonempty({ error: "Email or username is required" }),
+export const logInSchema = z.object({
+	username: z.string().nonempty({ error: "Username is required" }),
 	password: z.string().nonempty({ error: "Password is required" }),
 });
