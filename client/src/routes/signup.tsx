@@ -120,146 +120,146 @@ function SignUp() {
 						<CardDescription className="mb-[0.8rem] text-center text-muted-foreground text-sm">
 							Create an account to get started!
 						</CardDescription>
-						<CardContent>
-							<div className="grid gap-2">
-								<form.Field name="name">
-									{(field) => (
-										<div className="grid gap-2">
-											<Label htmlFor={field.name}>Full Name</Label>
-											<Input
-												id={field.name}
-												name={field.name}
-												value={field.state.value}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.value)}
-											/>
-											<FieldError field={field} />
-										</div>
-									)}
-								</form.Field>
-								<form.Field name="username">
-									{(field) => (
-										<div className="grid gap-2">
-											<Label htmlFor={field.name}>Username</Label>
-											<Input
-												id={field.name}
-												name={field.name}
-												value={field.state.value}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.value)}
-											/>
-											<FieldError field={field} />
-										</div>
-									)}
-								</form.Field>
-								<form.Field name="email">
-									{(field) => (
-										<div className="grid gap-2">
-											<Label htmlFor={field.name}>Email</Label>
-											<Input
-												id={field.name}
-												name={field.name}
-												type="email"
-												value={field.state.value}
-												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.value)}
-											/>
-											<FieldError field={field} />
-										</div>
-									)}
-								</form.Field>
-								<form.Field name="password">
-									{(field) => (
-										<div className="grid gap-2">
-											<Label htmlFor={field.name}>Password</Label>
-											<div className="relative">
-												<Input
-													id={field.name}
-													name={field.name}
-													type={showPassword ? "text" : "password"}
-													value={field.state.value}
-													onBlur={field.handleBlur}
-													onChange={(e) => field.handleChange(e.target.value)}
-													className="pr-10"
-												/>
-												<button
-													type="button"
-													className="-translate-y-1/2 absolute top-1/2 right-3 text-muted-foreground hover:text-foreground"
-													onClick={() => setShowPassword(!showPassword)}
-													tabIndex={-1}
-												>
-													{showPassword ? (
-														<EyeOff className="h-4 w-4" />
-													) : (
-														<Eye className="h-4 w-4" />
-													)}
-												</button>
-											</div>
-											<FieldError field={field} />
-										</div>
-									)}
-								</form.Field>
-								<form.Field name="confirmPassword">
-									{(field) => (
-										<div className="grid gap-2">
-											<Label htmlFor={field.name}>Confirm Password</Label>
-											<div className="relative">
-												<Input
-													id={field.name}
-													name={field.name}
-													type={showPassword ? "text" : "password"}
-													value={field.state.value}
-													onBlur={field.handleBlur}
-													onChange={(e) => field.handleChange(e.target.value)}
-													className="pr-10"
-												/>
-												<button
-													type="button"
-													className="-translate-y-1/2 absolute top-1/2 right-3 text-muted-foreground hover:text-foreground"
-													onClick={() => setShowPassword(!showPassword)}
-													tabIndex={-1}
-												>
-													{showPassword ? (
-														<EyeOff className="h-4 w-4" />
-													) : (
-														<Eye className="h-4 w-4" />
-													)}
-												</button>
-											</div>
-											<FieldError field={field} />
-										</div>
-									)}
-								</form.Field>
-								<form.Subscribe
-									selector={(state) => [
-										state.canSubmit,
-										state.isSubmitting,
-										state.isPristine,
-									]}
-								>
-									{([canSubmit, isSubmitting, isPristine]) => (
-										<Button
-											type="submit"
-											disabled={!canSubmit || isSubmitting || isPristine}
-											className="w-full"
-										>
-											{isSubmitting ? "Signing Up..." : "Sign Up"}
-										</Button>
-									)}
-								</form.Subscribe>
-								<p className="mt-2 text-center text-muted-foreground text-sm">
-									Already have an account?{" "}
-									<Link
-										to="/login"
-										search={{ redirect: search.redirect }}
-										className="text-primary underline hover:text-primary/80"
-									>
-										Log in
-									</Link>
-								</p>
-							</div>
-						</CardContent>
 					</CardHeader>
+					<CardContent>
+						<div className="grid gap-2">
+							<form.Field name="name">
+								{(field) => (
+									<div className="grid gap-2">
+										<Label htmlFor={field.name}>Full Name</Label>
+										<Input
+											id={field.name}
+											name={field.name}
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(e) => field.handleChange(e.target.value)}
+										/>
+										<FieldError field={field} />
+									</div>
+								)}
+							</form.Field>
+							<form.Field name="username">
+								{(field) => (
+									<div className="grid gap-2">
+										<Label htmlFor={field.name}>Username</Label>
+										<Input
+											id={field.name}
+											name={field.name}
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(e) => field.handleChange(e.target.value)}
+										/>
+										<FieldError field={field} />
+									</div>
+								)}
+							</form.Field>
+							<form.Field name="email">
+								{(field) => (
+									<div className="grid gap-2">
+										<Label htmlFor={field.name}>Email</Label>
+										<Input
+											id={field.name}
+											name={field.name}
+											type="email"
+											value={field.state.value}
+											onBlur={field.handleBlur}
+											onChange={(e) => field.handleChange(e.target.value)}
+										/>
+										<FieldError field={field} />
+									</div>
+								)}
+							</form.Field>
+							<form.Field name="password">
+								{(field) => (
+									<div className="grid gap-2">
+										<Label htmlFor={field.name}>Password</Label>
+										<div className="relative">
+											<Input
+												id={field.name}
+												name={field.name}
+												type={showPassword ? "text" : "password"}
+												value={field.state.value}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												className="pr-10"
+											/>
+											<button
+												type="button"
+												className="-translate-y-1/2 absolute top-1/2 right-3 text-muted-foreground hover:text-foreground"
+												onClick={() => setShowPassword(!showPassword)}
+												tabIndex={-1}
+											>
+												{showPassword ? (
+													<EyeOff className="h-4 w-4" />
+												) : (
+													<Eye className="h-4 w-4" />
+												)}
+											</button>
+										</div>
+										<FieldError field={field} />
+									</div>
+								)}
+							</form.Field>
+							<form.Field name="confirmPassword">
+								{(field) => (
+									<div className="grid gap-2">
+										<Label htmlFor={field.name}>Confirm Password</Label>
+										<div className="relative">
+											<Input
+												id={field.name}
+												name={field.name}
+												type={showPassword ? "text" : "password"}
+												value={field.state.value}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												className="pr-10"
+											/>
+											<button
+												type="button"
+												className="-translate-y-1/2 absolute top-1/2 right-3 text-muted-foreground hover:text-foreground"
+												onClick={() => setShowPassword(!showPassword)}
+												tabIndex={-1}
+											>
+												{showPassword ? (
+													<EyeOff className="h-4 w-4" />
+												) : (
+													<Eye className="h-4 w-4" />
+												)}
+											</button>
+										</div>
+										<FieldError field={field} />
+									</div>
+								)}
+							</form.Field>
+							<form.Subscribe
+								selector={(state) => [
+									state.canSubmit,
+									state.isSubmitting,
+									state.isPristine,
+								]}
+							>
+								{([canSubmit, isSubmitting, isPristine]) => (
+									<Button
+										type="submit"
+										disabled={!canSubmit || isSubmitting || isPristine}
+										className="w-full"
+									>
+										{isSubmitting ? "Signing Up..." : "Sign Up"}
+									</Button>
+								)}
+							</form.Subscribe>
+							<p className="mt-2 text-center text-muted-foreground text-sm">
+								Already have an account?{" "}
+								<Link
+									to="/login"
+									search={{ redirect: search.redirect }}
+									className="text-primary underline hover:text-primary/80"
+								>
+									Log in
+								</Link>
+							</p>
+						</div>
+					</CardContent>
 				</form>
 			</Card>
 		</div>
