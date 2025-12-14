@@ -1,5 +1,8 @@
-import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { MenuIcon } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import { currentUserQueryOptions } from "@/services/current-user";
 import { Button } from "./ui/button";
 import {
 	Sheet,
@@ -11,6 +14,8 @@ import {
 } from "./ui/sheet";
 
 export function Header() {
+	const navigate = useNavigate();
+	const { data: currentUser } = useQuery(currentUserQueryOptions());
 	return (
 		<header className="sticky top-0 z-50 w-full border-border/40 bg-primary/95 backdrop-blur supports-backdrop-filter:bg-primary/90">
 			<div className="container mx-auto flex items-center justify-between p-4">
@@ -20,15 +25,42 @@ export function Header() {
 					</Link>
 					<nav className="hidden items-center space-x-4 md:flex">
 						<Link to="/" className="hover:underline">
-							new
+							New
 						</Link>
 						<Link to="/" className="hover:underline">
-							top
+							Top
 						</Link>
 						<Link to="/" className="hover:underline">
-							submit
+							Submit
 						</Link>
 					</nav>
+				</div>
+				<div className="hidden items-center space-x-4 md:flex">
+					{currentUser ? (
+						<>
+							<span>{currentUser.username}</span>
+							<Button
+								size={"sm"}
+								variant={"secondary"}
+								className="bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70"
+								onClick={() => {
+									authClient.signOut();
+									navigate({ to: "/" });
+								}}
+							>
+								Log out
+							</Button>
+						</>
+					) : (
+						<Button
+							asChild
+							size={"sm"}
+							variant={"secondary"}
+							className="bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70"
+						>
+							<Link to="/">Log in</Link>
+						</Button>
+					)}
 				</div>
 				<Sheet>
 					<SheetTrigger asChild>
@@ -45,14 +77,40 @@ export function Header() {
 						</SheetHeader>
 						<nav className="flex flex-col space-y-4 px-4">
 							<Link to="/" className="hover:underline">
-								new
+								New
 							</Link>
 							<Link to="/" className="hover:underline">
-								top
+								Top
 							</Link>
 							<Link to="/" className="hover:underline">
-								submit
+								Submit
 							</Link>
+							{currentUser ? (
+								<>
+									<span>Profile [{currentUser.username}]</span>
+									<Button
+										size={"sm"}
+										variant={"secondary"}
+										className="bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70"
+										onClick={() => {
+											authClient.signOut();
+											navigate({ to: "/" });
+											
+										}}
+									>
+										Logout
+									</Button>
+								</>
+							) : (
+								<Button
+									asChild
+									size={"sm"}
+									variant={"secondary"}
+									className="bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70"
+								>
+									<Link to="/">Log in</Link>
+								</Button>
+							)}
 						</nav>
 					</SheetContent>
 				</Sheet>

@@ -26,14 +26,21 @@ export const Route = createFileRoute("/signup")({
 
 const signUp = async ({
 	name,
+	username,
 	email,
 	password,
 }: {
 	name: string;
+	username: string;
 	email: string;
 	password: string;
 }) => {
-	const res = await authClient.signUp.email({ name, email, password });
+	const res = await authClient.signUp.email({
+		name,
+		username,
+		email,
+		password,
+	});
 	if (res.error || !res.data) {
 		return {
 			success: false,
@@ -52,6 +59,7 @@ function SignUp() {
 		defaultValues: {
 			name: "",
 			email: "",
+			username: "",
 			password: "",
 			confirmPassword: "",
 		},
@@ -61,6 +69,7 @@ function SignUp() {
 		onSubmit: async ({ value }) => {
 			const result = await signUp({
 				name: value.name,
+				username: value.username,
 				email: value.email,
 				password: value.password,
 			});
@@ -70,7 +79,14 @@ function SignUp() {
 				return;
 			}
 
-			if (result.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
+			if (result.code === "USERNAME_IS_ALREADY_TAKEN_PLEASE_TRY_ANOTHER") {
+				form.setFieldMeta("username", (prev) => ({
+					...prev,
+					errorMap: {
+						onSubmit: "This username is already taken",
+					},
+				}));
+			} else if (result.code === "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL") {
 				form.setFieldMeta("email", (prev) => ({
 					...prev,
 					errorMap: {
@@ -78,6 +94,7 @@ function SignUp() {
 					},
 				}));
 			} else {
+				console.log(result.code);
 				toast.error("Sign up failed", {
 					description: result.message,
 				});
@@ -105,7 +122,22 @@ function SignUp() {
 								<form.Field name="name">
 									{(field) => (
 										<div className="grid gap-2">
-											<Label htmlFor={field.name}>Name</Label>
+											<Label htmlFor={field.name}>Full Name</Label>
+											<Input
+												id={field.name}
+												name={field.name}
+												value={field.state.value}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+											/>
+											<FieldError field={field} />
+										</div>
+									)}
+								</form.Field>
+								<form.Field name="username">
+									{(field) => (
+										<div className="grid gap-2">
+											<Label htmlFor={field.name}>Username</Label>
 											<Input
 												id={field.name}
 												name={field.name}

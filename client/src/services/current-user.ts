@@ -11,10 +11,11 @@ const getCurrentUser = async () => {
 	return {
 		name: session.user.name,
 		email: session.user.email,
+		username: session.user.username,
 	};
 };
 
-export const currentUserQuery = () =>
+export const currentUserQueryOptions = () =>
 	queryOptions({
 		queryKey: ["currentUser"],
 		queryFn: getCurrentUser,
