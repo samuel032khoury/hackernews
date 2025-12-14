@@ -6,6 +6,8 @@ import { commentUpvotes, postUpvotes } from "./upvotes.schema";
 
 export const users = pgTable("users", {
 	id: text("id").primaryKey(),
+	username: text("username").notNull().unique(),
+	displayUsername: text("display_username").notNull(),
 	name: text("name").notNull(),
 	email: text("email").notNull().unique(),
 	emailVerified: boolean("email_verified").default(false).notNull(),

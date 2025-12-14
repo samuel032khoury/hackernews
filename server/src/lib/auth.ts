@@ -1,7 +1,7 @@
 import { AUTH_CONSTRAINTS } from "@shared/constants";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { openAPI } from "better-auth/plugins";
+import { openAPI, username } from "better-auth/plugins";
 import { db } from "@/db";
 import * as schema from "@/db/schema/auth.schema";
 import { processEnv } from "./env";
@@ -20,6 +20,6 @@ export const auth = betterAuth({
 		minPasswordLength: PASSWORD_MIN_LENGTH,
 		maxPasswordLength: PASSWORD_MAX_LENGTH,
 	},
-	plugins: [openAPI()],
+	plugins: [openAPI(), username()],
 	trustedOrigins: [processEnv.CLIENT_URL || ""],
 }) as ReturnType<typeof betterAuth>;
