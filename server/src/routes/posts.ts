@@ -19,7 +19,7 @@ import {
 } from "@/db/schema";
 import type { AppEnv, ProtectedEnv } from "@/lib/env";
 import { getISOFormatDateQuery } from "@/lib/utils";
-import requireAuth from "@/middleware/requireAuth";
+import requireAuth from "@/middlewares/requireAuth";
 import { throwOnError } from "@/validators";
 import { createCommentSchema } from "@/validators/comments.validation";
 import { createPostSchema } from "@/validators/posts.validation";

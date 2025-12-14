@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
-import authHandler from "@/middleware/authHandler";
-import { handleError } from "@/middleware/errorHandler";
+import authHandler from "@/middlewares/authHandler";
+import { handleError } from "@/middlewares/errorHandler";
 import { authRoutes } from "@/routes/auth";
 import { commentRouter } from "@/routes/comments";
 import { postRouter } from "@/routes/posts";

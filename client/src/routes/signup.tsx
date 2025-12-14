@@ -16,8 +16,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
-import { signUpSchema } from "@/validator/auth.validation";
-import { urlRedirectSchema } from "@/validator/url.validation";
+import { signUpSchema } from "@/validators/auth.validation";
+import { urlRedirectSchema } from "@/validators/url.validation";
 
 export const Route = createFileRoute("/signup")({
 	component: SignUp,
