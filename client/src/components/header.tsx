@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { MenuIcon } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
@@ -15,7 +15,13 @@ import {
 
 export function Header() {
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 	const { data: currentUser } = useQuery(currentUserQueryOptions());
+	const handleLogout = async () => {
+		await authClient.signOut();
+		await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+		navigate({ to: "/" });
+	};
 	return (
 		<header className="sticky top-0 z-50 w-full border-border/40 bg-primary/95 backdrop-blur supports-backdrop-filter:bg-primary/90">
 			<div className="container mx-auto flex items-center justify-between p-4">
@@ -43,23 +49,30 @@ export function Header() {
 								size={"sm"}
 								variant={"secondary"}
 								className="bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70"
-								onClick={() => {
-									authClient.signOut();
-									navigate({ to: "/" });
-								}}
+								onClick={handleLogout}
 							>
 								Log out
 							</Button>
 						</>
 					) : (
-						<Button
-							asChild
-							size={"sm"}
-							variant={"secondary"}
-							className="bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70"
-						>
-							<Link to="/">Log in</Link>
-						</Button>
+						<div className="flex items-center space-x-2">
+							<Button
+								asChild
+								size={"sm"}
+								variant={"secondary"}
+								className="bg-primary-foreground text-secondary-foreground hover:bg-primary-foreground/70"
+							>
+								<Link to="/login">Log in</Link>
+							</Button>
+							<Button
+								asChild
+								size={"sm"}
+								variant={"secondary"}
+								className="bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70"
+							>
+								<Link to="/signup">Sign up</Link>
+							</Button>
+						</div>
 					)}
 				</div>
 				<Sheet>
@@ -92,24 +105,30 @@ export function Header() {
 										size={"sm"}
 										variant={"secondary"}
 										className="bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70"
-										onClick={() => {
-											authClient.signOut();
-											navigate({ to: "/" });
-											
-										}}
+										onClick={handleLogout}
 									>
 										Logout
 									</Button>
 								</>
 							) : (
-								<Button
-									asChild
-									size={"sm"}
-									variant={"secondary"}
-									className="bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70"
-								>
-									<Link to="/">Log in</Link>
-								</Button>
+								<div className="items-center space-x-2">
+									<Button
+										asChild
+										size={"sm"}
+										variant={"secondary"}
+										className="bg-primary text-primary-foreground hover:bg-primary-foreground/70"
+									>
+										<Link to="/login">Log in</Link>
+									</Button>
+									<Button
+										asChild
+										size={"sm"}
+										variant={"secondary"}
+										className="bg-secondary-foreground text-primary-foreground hover:bg-secondary-foreground/70"
+									>
+										<Link to="/signup">Sign up</Link>
+									</Button>
+								</div>
 							)}
 						</nav>
 					</SheetContent>

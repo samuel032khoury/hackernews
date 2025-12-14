@@ -1,5 +1,6 @@
 import type { ApiError } from "@shared/types";
 import { useForm } from "@tanstack/react-form";
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
@@ -54,6 +55,7 @@ const signUp = async ({
 function SignUp() {
 	const search = Route.useSearch();
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 	const [showPassword, setShowPassword] = useState(false);
 	const form = useForm({
 		defaultValues: {
@@ -75,6 +77,7 @@ function SignUp() {
 			});
 
 			if (result.success) {
+				queryClient.invalidateQueries({ queryKey: ["currentUser"] });
 				navigate({ to: search.redirect });
 				return;
 			}
