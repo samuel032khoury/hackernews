@@ -20,7 +20,7 @@ export function Header() {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const queryClient = useQueryClient();
-	const { data: currentUser } = useQuery(currentUserQueryOptions());
+	const { data: currentUser } = useQuery(currentUserQueryOptions);
 	const [sheetOpen, setSheetOpen] = useState(false);
 
 	const isAuthPage =

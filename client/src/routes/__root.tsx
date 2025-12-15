@@ -1,10 +1,15 @@
+import type { QueryClient } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Toaster } from "sonner";
 import { Header } from "@/components/header";
 
-export const Route = createRootRoute({
+interface AppRouterContext {
+	queryClient: QueryClient;
+}
+
+export const Route = createRootRouteWithContext<AppRouterContext>()({
 	component: () => (
 		<>
 			<div className="flex min-h-screen flex-col bg-[#f5f5ed] text-foreground">

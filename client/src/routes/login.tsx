@@ -2,7 +2,13 @@ import { Label } from "@radix-ui/react-label";
 import type { ApiError } from "@shared/types";
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+	createFileRoute,
+	Link,
+	redirect,
+	useNavigate,
+	useRouter,
+} from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,12 +20,23 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
+import { currentUserQueryOptions } from "@/services/current-user";
 import { logInSchema } from "@/validators/auth.validation";
 import { urlRedirectSchema } from "@/validators/url.validation";
 
 export const Route = createFileRoute("/login")({
 	component: Login,
 	validateSearch: urlRedirectSchema,
+	beforeLoad: async ({ context, search }) => {
+		const currentUser = await context.queryClient.ensureQueryData(
+			currentUserQueryOptions,
+		);
+		if (currentUser) {
+			throw redirect({
+				to: search.redirect,
+			});
+		}
+	},
 });
 
 const signIn = async ({
@@ -45,6 +62,7 @@ const signIn = async ({
 
 function Login() {
 	const search = Route.useSearch();
+	const router = useRouter();
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const form = useForm({
@@ -62,8 +80,9 @@ function Login() {
 			});
 
 			if (result.success) {
-				queryClient.invalidateQueries({ queryKey: ["currentUser"] });
 				toast.success("Logged in successfully");
+				router.invalidate();
+				queryClient.invalidateQueries({ queryKey: ["currentUser"] });
 				navigate({ to: search.redirect });
 				return;
 			} else {

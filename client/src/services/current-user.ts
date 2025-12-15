@@ -15,9 +15,8 @@ const getCurrentUser = async () => {
 	};
 };
 
-export const currentUserQueryOptions = () =>
-	queryOptions({
-		queryKey: ["currentUser"],
-		queryFn: getCurrentUser,
-		staleTime: Infinity,
-	});
+export const currentUserQueryOptions = queryOptions({
+	queryKey: ["currentUser"],
+	queryFn: getCurrentUser,
+	staleTime: Infinity,
+});
