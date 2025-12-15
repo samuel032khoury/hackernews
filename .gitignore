@@ -6,6 +6,9 @@ node_modules
 # testing
 coverage
 
+# bruno
+.bruno
+
 # production
 dist
 build
