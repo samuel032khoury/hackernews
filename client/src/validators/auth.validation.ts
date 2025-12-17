@@ -1,10 +1,10 @@
-import { AUTH_CONSTRAINTS } from "@shared/constants";
+import { authConfig } from "@shared/config";
 import { z } from "zod";
 
-const PASSWORD_MIN_LENGTH = AUTH_CONSTRAINTS.PASSWORD_MIN_LENGTH;
-const PASSWORD_MAX_LENGTH = AUTH_CONSTRAINTS.PASSWORD_MAX_LENGTH;
-const NAME_MAX_LENGTH = AUTH_CONSTRAINTS.NAME_MAX_LENGTH;
-const USERNAME_MIN_LENGTH = AUTH_CONSTRAINTS.USERNAME_MIN_LENGTH;
+const PASSWORD_MIN_LENGTH = authConfig.password.minLength;
+const PASSWORD_MAX_LENGTH = authConfig.password.maxLength;
+const NAME_MAX_LENGTH = authConfig.name.maxLength;
+const USERNAME_MIN_LENGTH = authConfig.username.minLength;
 
 export const signUpSchema = z
 	.object({

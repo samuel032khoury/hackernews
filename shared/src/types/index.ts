@@ -27,8 +27,6 @@ export type ApiError = {
 	code?: string;
 };
 
-export type AppError = ApiError | ValidationError;
-
 export interface Comment {
 	id: number;
 	userId: string;

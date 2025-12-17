@@ -1,4 +1,4 @@
-import { AUTH_CONSTRAINTS } from "@shared/constants";
+import { authConfig } from "@shared/config";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { openAPI, username } from "better-auth/plugins";
@@ -6,8 +6,8 @@ import { db } from "@/db";
 import * as schema from "@/db/schema/auth.schema";
 import { processEnv } from "./env";
 
-const PASSWORD_MIN_LENGTH = AUTH_CONSTRAINTS.PASSWORD_MIN_LENGTH;
-const PASSWORD_MAX_LENGTH = AUTH_CONSTRAINTS.PASSWORD_MAX_LENGTH;
+const PASSWORD_MIN_LENGTH = authConfig.password.minLength;
+const PASSWORD_MAX_LENGTH = authConfig.password.maxLength;
 
 export const auth = betterAuth({
 	database: drizzleAdapter(db, {
