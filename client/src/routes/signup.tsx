@@ -96,9 +96,9 @@ function SignUp() {
 
 			if (result.success) {
 				toast.success("Account created successfully");
-				router.invalidate();
-				queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-				navigate({ to: search.redirect });
+				await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+				await router.invalidate();
+				await navigate({ to: search.redirect });
 				return;
 			}
 

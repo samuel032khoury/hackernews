@@ -1,5 +1,6 @@
 import { zValidator } from "@hono/zod-validator";
 import type { ApiResponse, Comment, PaginatedResponse } from "@shared/types";
+import { createCommentSchema } from "@shared/validators/comments.validation";
 import { and, asc, countDistinct, desc, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
@@ -9,8 +10,7 @@ import { comments, commentUpvotes, posts, users } from "@/db/schema";
 import type { AppEnv, ProtectedEnv } from "@/lib/env";
 import { getISOFormatDateQuery } from "@/lib/utils";
 import requireAuth from "@/middlewares/requireAuth";
-import { throwOnError } from "@/validators";
-import { createCommentSchema } from "@/validators/comments.validation";
+import { throwOnError } from "@/validators/errors";
 import { paginationSchema } from "@/validators/query.validation";
 
 const publicRoutes = new Hono<AppEnv>().get(

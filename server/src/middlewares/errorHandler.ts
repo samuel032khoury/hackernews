@@ -24,6 +24,7 @@ export const handleError = (err: Error, c: Context) => {
 				{
 					success: false,
 					message: err.message,
+					code: err.name,
 				},
 				err.status,
 			);

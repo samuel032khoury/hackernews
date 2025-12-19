@@ -5,6 +5,8 @@ import type {
 	PaginatedResponse,
 	Post,
 } from "@shared/types";
+import { createCommentSchema } from "@shared/validators/comments.validation";
+import { createPostSchema } from "@shared/validators/posts.validation";
 import { and, asc, countDistinct, desc, eq, isNull, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
@@ -20,9 +22,7 @@ import {
 import type { AppEnv, ProtectedEnv } from "@/lib/env";
 import { getISOFormatDateQuery } from "@/lib/utils";
 import requireAuth from "@/middlewares/requireAuth";
-import { throwOnError } from "@/validators";
-import { createCommentSchema } from "@/validators/comments.validation";
-import { createPostSchema } from "@/validators/posts.validation";
+import { throwOnError } from "@/validators/errors";
 import { paginationSchema } from "@/validators/query.validation";
 
 const protectedRoutes = new Hono<ProtectedEnv>()

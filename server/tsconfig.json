@@ -30,7 +30,11 @@
 			"@client/*": ["../client/src/*"]
 		}
 	},
-	"include": ["src/**/*"],
+	"include": [
+		"src/**/*",
+		"../shared/src/validators/comments.validation.ts",
+		"../shared/src/validators/posts.validation.ts"
+	],
 	"exclude": ["node_modules", "dist"],
 	"references": [{ "path": "../shared" }]
 }
