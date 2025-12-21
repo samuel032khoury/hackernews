@@ -4,7 +4,7 @@ import { MenuIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
-import { currentUserQueryOptions } from "@/services/current-user";
+import { currentUserQueryOptions } from "@/services/users";
 import { Button } from "./ui/button";
 import {
 	Sheet,
