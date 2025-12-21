@@ -1,4 +1,3 @@
-import type { ApiError } from "@shared/types";
 import { authClient } from "@/lib/auth-client";
 
 export const signIn = async ({
