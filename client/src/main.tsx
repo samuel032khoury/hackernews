@@ -7,6 +7,7 @@ import "./index.css";
 const queryClient = new QueryClient();
 
 import { ErrorComponent } from "./components/errorComponent";
+import { LoadingComponent } from "./components/loadingComponent";
 import { NotFoundComponent } from "./components/notFoundComponent";
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
@@ -19,6 +20,7 @@ const router = createRouter({
 	context: { queryClient },
 	defaultNotFoundComponent: NotFoundComponent,
 	defaultErrorComponent: ErrorComponent,
+	defaultPendingComponent: LoadingComponent,
 });
 
 // Register the router instance for type safety
