@@ -48,7 +48,7 @@ export interface Comment {
 	childComments?: Comment[];
 	author: {
 		id: string;
-		name: string;
+		username: string;
 	};
 }
 

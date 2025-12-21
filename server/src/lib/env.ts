@@ -1,6 +1,6 @@
-import type { Session, User } from "better-auth/types";
 import type { Env } from "hono";
 import z from "zod";
+import type { Session, User } from "./auth";
 
 export const processEnv = z
 	.object({

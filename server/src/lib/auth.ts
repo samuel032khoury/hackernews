@@ -22,4 +22,10 @@ export const auth = betterAuth({
 	},
 	plugins: [openAPI(), username()],
 	trustedOrigins: [processEnv.CLIENT_URL || ""],
-}) as ReturnType<typeof betterAuth>;
+});
+
+export type Session = typeof auth.$Infer.Session.session;
+export type User = typeof auth.$Infer.Session.user & {
+	username: string;
+	displayUsername: string;
+};

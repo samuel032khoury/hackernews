@@ -158,7 +158,7 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 					childComments: [] as Comment[],
 					author: {
 						id: user.id,
-						name: user.name,
+						username: user.username,
 					},
 				} satisfies Comment,
 			});
@@ -195,7 +195,7 @@ const publicRoutes = new Hono<AppEnv>()
 					commentsCount: posts.commentsCount,
 					createdAt: getISOFormatDateQuery(posts.createdAt),
 					author: {
-						username: users.name,
+						username: users.username,
 						id: users.id,
 					},
 					isUpvoted: user
@@ -280,7 +280,7 @@ const publicRoutes = new Hono<AppEnv>()
 					author: {
 						columns: {
 							id: true,
-							name: true,
+							username: true,
 						},
 					},
 					commentUpvotes: {
@@ -296,7 +296,7 @@ const publicRoutes = new Hono<AppEnv>()
 							author: {
 								columns: {
 									id: true,
-									name: true,
+									username: true,
 								},
 							},
 							commentUpvotes: {
@@ -353,7 +353,7 @@ const publicRoutes = new Hono<AppEnv>()
 					commentsCount: posts.commentsCount,
 					createdAt: getISOFormatDateQuery(posts.createdAt),
 					author: {
-						username: users.name,
+						username: users.username,
 						id: users.id,
 					},
 					isUpvoted: user

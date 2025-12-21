@@ -43,7 +43,7 @@ const publicRoutes = new Hono<AppEnv>().get(
 				author: {
 					columns: {
 						id: true,
-						name: true,
+						username: true,
 					},
 				},
 				commentUpvotes: {
@@ -153,7 +153,7 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 					childComments: [] as Comment[],
 					author: {
 						id: user.id,
-						name: user.name,
+						username: user.username,
 					},
 				} satisfies Comment,
 			});
