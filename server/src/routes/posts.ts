@@ -10,6 +10,7 @@ import { createPostSchema } from "@shared/validators/posts.validation";
 import { and, asc, countDistinct, desc, eq, isNull, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
+import { paginationSchema } from "shared/src/validators/search.validation";
 import z from "zod";
 import { db } from "@/db";
 import {
@@ -20,16 +21,14 @@ import {
 	users,
 } from "@/db/schema";
 import type { AppEnv, ProtectedEnv } from "@/lib/env";
-import { getISOFormatDateQuery } from "@/lib/utils";
+import { getISOFormatDateQuery, throwValidationError } from "@/lib/utils";
 import requireAuth from "@/middlewares/requireAuth";
-import { throwOnError } from "@/validators/errors";
-import { paginationSchema } from "@/validators/query.validation";
 
 const protectedRoutes = new Hono<ProtectedEnv>()
 	.post(
 		"/",
 		requireAuth,
-		zValidator("form", createPostSchema, throwOnError),
+		zValidator("form", createPostSchema, throwValidationError),
 		async (c) => {
 			const { title, url, content } = c.req.valid("form");
 			const user = c.get("user");
@@ -57,7 +56,11 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 	.post(
 		"/:id/upvote",
 		requireAuth,
-		zValidator("param", z.object({ id: z.coerce.number() }), throwOnError),
+		zValidator(
+			"param",
+			z.object({ id: z.coerce.number() }),
+			throwValidationError,
+		),
 		async (c) => {
 			const { id } = c.req.valid("param");
 			const user = c.get("user");
@@ -105,8 +108,12 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 	.post(
 		"/:id/comment",
 		requireAuth,
-		zValidator("param", z.object({ id: z.coerce.number() }), throwOnError),
-		zValidator("form", createCommentSchema, throwOnError),
+		zValidator(
+			"param",
+			z.object({ id: z.coerce.number() }),
+			throwValidationError,
+		),
+		zValidator("form", createCommentSchema, throwValidationError),
 		async (c) => {
 			const { id } = c.req.valid("param");
 			const { content } = c.req.valid("form");
@@ -159,76 +166,88 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 	);
 
 const publicRoutes = new Hono<AppEnv>()
-	.get("/", zValidator("query", paginationSchema, throwOnError), async (c) => {
-		const { limit, page, sortBy, order, author, site } = c.req.valid("query");
-		const user = c.get("user");
-		const offset = (page - 1) * limit;
-		const sortByColumn = sortBy === "points" ? posts.points : posts.createdAt;
-		const sortOrder = order === "desc" ? desc(sortByColumn) : asc(sortByColumn);
-		const [count] = await db
-			.select({ count: countDistinct(posts.id) })
-			.from(posts)
-			.where(
-				and(
-					author ? eq(posts.userId, author) : undefined,
-					site ? eq(posts.url, site) : undefined,
-				),
-			);
-		const postsQuery = db
-			.select({
-				id: posts.id,
-				title: posts.title,
-				url: posts.url,
-				content: posts.content,
-				points: posts.points,
-				commentsCount: posts.commentsCount,
-				createdAt: getISOFormatDateQuery(posts.createdAt),
-				author: {
-					username: users.name,
-					id: users.id,
-				},
-				isUpvoted: user
-					? sql<boolean>`CASE WHEN ${postUpvotes.userId} IS NOT NULL THEN true ELSE false END`
-					: sql<boolean>`false`,
-			})
-			.from(posts)
-			.innerJoin(users, eq(posts.userId, users.id))
-			.orderBy(sortOrder)
-			.limit(limit)
-			.offset(offset)
-			.where(
-				and(
-					author ? eq(posts.userId, author) : undefined,
-					site ? eq(posts.url, site) : undefined,
-				),
-			);
-		if (user) {
-			postsQuery.leftJoin(
-				postUpvotes,
-				and(eq(postUpvotes.postId, posts.id), eq(postUpvotes.userId, user.id)),
-			);
-		}
-		const result = await postsQuery;
+	.get(
+		"/",
+		zValidator("query", paginationSchema, throwValidationError),
+		async (c) => {
+			const { limit, page, sortBy, order, author, site } = c.req.valid("query");
+			const user = c.get("user");
+			const offset = (page - 1) * limit;
+			const sortByColumn = sortBy === "points" ? posts.points : posts.createdAt;
+			const sortOrder =
+				order === "desc" ? desc(sortByColumn) : asc(sortByColumn);
+			const [count] = await db
+				.select({ count: countDistinct(posts.id) })
+				.from(posts)
+				.where(
+					and(
+						author ? eq(posts.userId, author) : undefined,
+						site ? eq(posts.url, site) : undefined,
+					),
+				);
+			const postsQuery = db
+				.select({
+					id: posts.id,
+					title: posts.title,
+					url: posts.url,
+					content: posts.content,
+					points: posts.points,
+					commentsCount: posts.commentsCount,
+					createdAt: getISOFormatDateQuery(posts.createdAt),
+					author: {
+						username: users.name,
+						id: users.id,
+					},
+					isUpvoted: user
+						? sql<boolean>`CASE WHEN ${postUpvotes.userId} IS NOT NULL THEN true ELSE false END`
+						: sql<boolean>`false`,
+				})
+				.from(posts)
+				.innerJoin(users, eq(posts.userId, users.id))
+				.orderBy(sortOrder)
+				.limit(limit)
+				.offset(offset)
+				.where(
+					and(
+						author ? eq(posts.userId, author) : undefined,
+						site ? eq(posts.url, site) : undefined,
+					),
+				);
+			if (user) {
+				postsQuery.leftJoin(
+					postUpvotes,
+					and(
+						eq(postUpvotes.postId, posts.id),
+						eq(postUpvotes.userId, user.id),
+					),
+				);
+			}
+			const result = await postsQuery;
 
-		return c.json<PaginatedResponse<Post>>({
-			success: true,
-			message: "Fetched posts",
-			pagination: {
-				page,
-				totalPages: Math.ceil(count.count / limit),
-			},
-			data: result satisfies Post[],
-		});
-	})
+			return c.json<PaginatedResponse<Post>>({
+				success: true,
+				message: "Fetched posts",
+				pagination: {
+					page,
+					totalPages: Math.ceil(count.count / limit),
+				},
+				data: result satisfies Post[],
+			});
+		},
+	)
 	.get(
 		"/:id/comments",
-		zValidator("param", z.object({ id: z.coerce.number() }), throwOnError),
+		zValidator(
+			"param",
+			z.object({ id: z.coerce.number() }),
+			throwValidationError,
+		),
 		zValidator(
 			"query",
 			paginationSchema.extend({
 				includeChildren: z.coerce.boolean().optional(),
 			}),
-			throwOnError,
+			throwValidationError,
 		),
 		async (c) => {
 			const user = c.get("user");
@@ -316,7 +335,11 @@ const publicRoutes = new Hono<AppEnv>()
 	)
 	.get(
 		"/:id",
-		zValidator("param", z.object({ id: z.coerce.number() }), throwOnError),
+		zValidator(
+			"param",
+			z.object({ id: z.coerce.number() }),
+			throwValidationError,
+		),
 		async (c) => {
 			const user = c.get("user");
 			const { id } = c.req.valid("param");

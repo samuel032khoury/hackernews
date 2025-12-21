@@ -4,14 +4,13 @@ import { createCommentSchema } from "@shared/validators/comments.validation";
 import { and, asc, countDistinct, desc, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
+import { paginationSchema } from "shared/src/validators/search.validation";
 import z from "zod";
 import { db } from "@/db";
 import { comments, commentUpvotes, posts, users } from "@/db/schema";
 import type { AppEnv, ProtectedEnv } from "@/lib/env";
-import { getISOFormatDateQuery } from "@/lib/utils";
+import { getISOFormatDateQuery, throwValidationError } from "@/lib/utils";
 import requireAuth from "@/middlewares/requireAuth";
-import { throwOnError } from "@/validators/errors";
-import { paginationSchema } from "@/validators/query.validation";
 
 const publicRoutes = new Hono<AppEnv>().get(
 	"/:id/comments",
@@ -20,9 +19,9 @@ const publicRoutes = new Hono<AppEnv>().get(
 		z.object({
 			id: z.coerce.number(),
 		}),
-		throwOnError,
+		throwValidationError,
 	),
-	zValidator("query", paginationSchema, throwOnError),
+	zValidator("query", paginationSchema, throwValidationError),
 	async (c) => {
 		const { id } = c.req.valid("param");
 		const user = c.get("user");
@@ -80,9 +79,9 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 			z.object({
 				id: z.coerce.number(),
 			}),
-			throwOnError,
+			throwValidationError,
 		),
-		zValidator("form", createCommentSchema, throwOnError),
+		zValidator("form", createCommentSchema, throwValidationError),
 		async (c) => {
 			const { id } = c.req.valid("param");
 			const { content } = c.req.valid("form");
@@ -168,7 +167,7 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 			z.object({
 				id: z.coerce.number(),
 			}),
-			throwOnError,
+			throwValidationError,
 		),
 		async (c) => {
 			const { id } = c.req.valid("param");
