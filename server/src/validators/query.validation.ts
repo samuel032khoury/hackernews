@@ -1,7 +1,8 @@
+import {
+	orderSchema,
+	sortBySchema,
+} from "@shared/validators/search.validation";
 import z from "zod";
-
-export const sortBySchema = z.enum(["points", "recent"]);
-export const orderSchema = z.enum(["asc", "desc"]);
 
 export const paginationSchema = z.object({
 	limit: z.coerce.number().optional().default(10),
