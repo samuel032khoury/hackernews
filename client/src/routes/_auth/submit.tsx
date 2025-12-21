@@ -1,4 +1,3 @@
-import type { ApiError } from "@shared/types";
 import { createPostSchema } from "@shared/validators/posts.validation";
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
@@ -16,25 +15,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { api } from "@/lib/api";
+import { submitPost } from "@/services/posts";
 
 export const Route = createFileRoute("/_auth/submit")({
 	component: Submit,
 });
-
-const submitPost = async (title: string, url: string, content: string) => {
-	try {
-		const res = await api.posts.$post({
-			form: { title, url, content },
-		});
-		return await res.json();
-	} catch {
-		return {
-			success: false as const,
-			message: "Failed to submit post (network error)",
-		} satisfies ApiError;
-	}
-};
 
 function Submit() {
 	const queryClient = useQueryClient();

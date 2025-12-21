@@ -1,5 +1,4 @@
 import { Label } from "@radix-ui/react-label";
-import type { ApiError } from "@shared/types";
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -19,7 +18,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { authClient } from "@/lib/auth-client";
+import { signIn } from "@/services/auth";
 import { currentUserQueryOptions } from "@/services/users";
 import { logInSchema } from "@/validators/auth.validation";
 import { pathRedirectSchema } from "@/validators/path.validation";
@@ -38,27 +37,6 @@ export const Route = createFileRoute("/login")({
 		}
 	},
 });
-
-const signIn = async ({
-	username,
-	password,
-}: {
-	username: string;
-	password: string;
-}) => {
-	const res = await authClient.signIn.username({
-		username,
-		password,
-	});
-	if (res.error || !res.data) {
-		return {
-			success: false,
-			message: res.error?.message ?? "Log in failed",
-			code: res.error?.code,
-		} satisfies ApiError;
-	}
-	return { success: true, data: res.data };
-};
 
 function Login() {
 	const search = Route.useSearch();

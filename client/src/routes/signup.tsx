@@ -1,4 +1,3 @@
-import type { ApiError } from "@shared/types";
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -22,7 +21,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { authClient } from "@/lib/auth-client";
+import { signUp } from "@/services/auth";
 import { currentUserQueryOptions } from "@/services/users";
 import { signUpSchema } from "@/validators/auth.validation";
 import { pathRedirectSchema } from "@/validators/path.validation";
@@ -41,33 +40,6 @@ export const Route = createFileRoute("/signup")({
 		}
 	},
 });
-
-const signUp = async ({
-	name,
-	username,
-	email,
-	password,
-}: {
-	name: string;
-	username: string;
-	email: string;
-	password: string;
-}) => {
-	const res = await authClient.signUp.email({
-		name,
-		username,
-		email,
-		password,
-	});
-	if (res.error || !res.data) {
-		return {
-			success: false,
-			message: res.error?.message ?? "Sign up failed",
-			code: res.error?.code,
-		} satisfies ApiError;
-	}
-	return { success: true, data: res.data };
-};
 
 function SignUp() {
 	const search = Route.useSearch();
