@@ -17,7 +17,7 @@ export const signIn = async ({
 			success: false,
 			message: res.error?.message ?? "Log in failed",
 			code: res.error?.code,
-		} satisfies ApiError;
+		};
 	}
 	return { success: true, data: res.data };
 };
@@ -44,7 +44,7 @@ export const signUp = async ({
 			success: false,
 			message: res.error?.message ?? "Sign up failed",
 			code: res.error?.code,
-		} satisfies ApiError;
+		};
 	}
 	return { success: true, data: res.data };
 };
