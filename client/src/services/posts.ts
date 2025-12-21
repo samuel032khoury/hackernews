@@ -1,4 +1,3 @@
-import type { ApiError } from "@shared/types";
 import type { paginationSchema } from "@shared/validators/search.validation";
 import type z from "zod";
 import { api } from "@/lib/api";
@@ -19,17 +18,21 @@ export const getAllPosts = async ({
 			site: site,
 		},
 	});
+	const data = await res.json();
+	if (data.success) {
+		return data;
+	} else {
+		throw new Error(data.message);
+	}
 };
 
 export const getPost = async (id: number) => {
 	const res = await api.posts[":id"].$get({ param: { id: id.toString() } });
-	if (res.ok) {
-		return await res.json();
+	const data = await res.json();
+	if (data.success) {
+		return data;
 	} else {
-		const data = await res.json();
-		if (data.success === false) {
-			throw new Error(data.message);
-		}
+		throw new Error(data.message);
 	}
 };
 
@@ -47,6 +50,6 @@ export const submitPost = async (
 		return {
 			success: false as const,
 			message: "Failed to submit post (network error)",
-		} satisfies ApiError;
+		};
 	}
 };
