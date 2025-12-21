@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardTitle } from "./ui/card";
 
 export const PostCard = ({ post }: { post: Post }) => {
 	return (
-		<Card className="my-2 flex flex-row items-start justify-start py-3">
+		<Card className="flex flex-row items-start justify-start py-3">
 			<button
 				type="button"
 				className={cn(
