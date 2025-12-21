@@ -28,10 +28,10 @@ const submitPost = async (title: string, url: string, content: string) => {
 			form: { title, url, content },
 		});
 		return await res.json();
-	} catch (error) {
+	} catch {
 		return {
-			success: false,
-			message: (error as Error).message || "Submission failed",
+			success: false as const,
+			message: "Failed to submit post (network error)",
 		} satisfies ApiError;
 	}
 };
@@ -54,7 +54,10 @@ function Submit() {
 				await queryClient.invalidateQueries({ queryKey: ["posts"] });
 				await router.invalidate();
 				form.reset();
-				await router.navigate({ to: "/post", search: { id: res.data.postId } });
+				await router.navigate({
+					to: "/post",
+					search: { id: res.data.postId },
+				});
 				return;
 			} else {
 				toast.error("Submission failed", {

@@ -9,6 +9,7 @@ export const handleError = (err: Error, c: Context) => {
 			{
 				success: false,
 				code: "VALIDATION_ERROR",
+				message: "Validation failed",
 				issues: err.issues.map((issue) => ({
 					path: issue.path,
 					message: issue.message,

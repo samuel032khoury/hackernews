@@ -1,14 +1,20 @@
-export type ApiResponse<T = void> = {
+type SuccessResponse<T = void> = {
 	success: true;
 	message: string;
 } & (T extends void ? object : { data: T });
 
-export type PaginatedResponse<T> = ApiResponse<T> & {
-	pagination: {
-		totalPages: number;
-		page: number;
-	};
-};
+type ErrorResponse = ApiError | ValidationError;
+
+export type ApiResponse<T = void> = SuccessResponse<T> | ErrorResponse;
+
+export type PaginatedResponse<T> =
+	| (SuccessResponse<T> & {
+			pagination: {
+				totalPages: number;
+				page: number;
+			};
+	  })
+	| ErrorResponse;
 
 export type ValidationIssue = {
 	path: PropertyKey[];
@@ -18,6 +24,7 @@ export type ValidationIssue = {
 export type ValidationError = {
 	success: false;
 	code: "VALIDATION_ERROR";
+	message: string;
 	issues: ValidationIssue[];
 };
 
