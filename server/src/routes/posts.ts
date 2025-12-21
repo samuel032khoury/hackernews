@@ -210,7 +210,7 @@ const publicRoutes = new Hono<AppEnv>()
 		}
 		const result = await postsQuery;
 
-		return c.json<PaginatedResponse<Post[]>>({
+		return c.json<PaginatedResponse<Post>>({
 			success: true,
 			message: "Fetched posts",
 			pagination: {
@@ -300,7 +300,7 @@ const publicRoutes = new Hono<AppEnv>()
 					createdAt: getISOFormatDateQuery(comments.createdAt).as("created_at"),
 				},
 			});
-			return c.json<PaginatedResponse<Comment[]>>(
+			return c.json<PaginatedResponse<Comment>>(
 				{
 					success: true,
 					message: "Fetched comments",

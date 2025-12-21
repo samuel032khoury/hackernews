@@ -59,7 +59,7 @@ const publicRoutes = new Hono<AppEnv>().get(
 				createdAt: getISOFormatDateQuery(comments.createdAt).as("created_at"),
 			},
 		});
-		return c.json<PaginatedResponse<Comment[]>>({
+		return c.json<PaginatedResponse<Comment>>({
 			success: true,
 			message: "Fetched comments",
 			pagination: {

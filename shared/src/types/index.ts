@@ -8,7 +8,7 @@ type ErrorResponse = ApiError | ValidationError;
 export type ApiResponse<T = void> = SuccessResponse<T> | ErrorResponse;
 
 export type PaginatedResponse<T> =
-	| (SuccessResponse<T> & {
+	| (SuccessResponse<Array<T>> & {
 			pagination: {
 				totalPages: number;
 				page: number;
