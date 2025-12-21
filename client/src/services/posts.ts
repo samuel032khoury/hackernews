@@ -1,6 +1,28 @@
 import type { paginationSchema } from "@shared/validators/search.validation";
+import { infiniteQueryOptions } from "@tanstack/react-query";
 import type z from "zod";
 import { api } from "@/lib/api";
+
+export const postsInfiniteQueryOptions = ({
+	sortBy,
+	limit,
+	order,
+	author,
+	site,
+}: z.infer<typeof paginationSchema>) =>
+	infiniteQueryOptions({
+		queryKey: ["posts", sortBy, order, author, site],
+		queryFn: ({ pageParam }) =>
+			getAllPosts({ page: pageParam, limit, sortBy, order, author, site }),
+		initialPageParam: 1,
+		staleTime: Infinity,
+		getNextPageParam: (lastPage, _, lastPageParam) => {
+			if (lastPage.pagination.totalPages <= lastPageParam) {
+				return undefined;
+			}
+			return lastPageParam + 1;
+		},
+	});
 
 export const getAllPosts = async ({
 	page = 1,
@@ -12,10 +34,10 @@ export const getAllPosts = async ({
 	const res = await api.posts.$get({
 		query: {
 			page: page.toString(),
-			sortBy: sortBy,
-			order: order,
-			author: author,
-			site: site,
+			sortBy,
+			order,
+			author,
+			site,
 		},
 	});
 	const data = await res.json();
