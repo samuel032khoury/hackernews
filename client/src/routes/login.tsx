@@ -1,4 +1,3 @@
-import { Label } from "@radix-ui/react-label";
 import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -18,6 +17,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { signIn } from "@/services/auth";
 import { currentUserQueryOptions } from "@/services/users";
 import { logInSchema } from "@/validators/auth.validation";
