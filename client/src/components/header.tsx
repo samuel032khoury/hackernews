@@ -61,7 +61,7 @@ export function Header() {
 							<Link to="/" className="hover:underline">
 								Top
 							</Link>
-							<Link to="/" className="hover:underline">
+							<Link to="/submit" className="hover:underline">
 								Submit
 							</Link>
 						</nav>
@@ -106,7 +106,7 @@ export function Header() {
 											Top
 										</Link>
 										<Link
-											to="/"
+											to="/submit"
 											className="hover:underline"
 											onClick={closeSheet}
 										>
