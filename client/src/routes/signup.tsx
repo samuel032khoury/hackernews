@@ -25,11 +25,11 @@ import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 import { currentUserQueryOptions } from "@/services/current-user";
 import { signUpSchema } from "@/validators/auth.validation";
-import { urlRedirectSchema } from "@/validators/url.validation";
+import { pathRedirectSchema } from "@/validators/path.validation";
 
 export const Route = createFileRoute("/signup")({
 	component: SignUp,
-	validateSearch: urlRedirectSchema,
+	validateSearch: pathRedirectSchema,
 	beforeLoad: async ({ context, search }) => {
 		const currentUser = await context.queryClient.ensureQueryData(
 			currentUserQueryOptions,

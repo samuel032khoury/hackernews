@@ -22,11 +22,11 @@ import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
 import { currentUserQueryOptions } from "@/services/current-user";
 import { logInSchema } from "@/validators/auth.validation";
-import { urlRedirectSchema } from "@/validators/url.validation";
+import { pathRedirectSchema } from "@/validators/path.validation";
 
 export const Route = createFileRoute("/login")({
 	component: Login,
-	validateSearch: urlRedirectSchema,
+	validateSearch: pathRedirectSchema,
 	beforeLoad: async ({ context, search }) => {
 		const currentUser = await context.queryClient.ensureQueryData(
 			currentUserQueryOptions,
