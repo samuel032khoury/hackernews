@@ -45,7 +45,7 @@ function Submit() {
 				});
 				return;
 			} else {
-				toast.error("Submission failed", {
+				toast.error("Submission Failed", {
 					description: res.message || "Unknown error",
 				});
 			}

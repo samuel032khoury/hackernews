@@ -71,7 +71,12 @@ export const submitPost = async (
 	} catch {
 		return {
 			success: false as const,
-			message: "Failed to submit post (network error)",
+			message: "Network error",
 		};
 	}
+};
+
+export const upvotePost = async (id: string) => {
+	const res = await api.posts[":id"].upvote.$post({ param: { id } });
+	return await res.json();
 };

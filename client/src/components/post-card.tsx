@@ -1,18 +1,28 @@
 import type { Post } from "@shared/types";
 import { Link } from "@tanstack/react-router";
 import { ChevronUpIcon } from "lucide-react";
+import { useUpvotePost } from "@/hooks/upvote";
 import { cn, relativeTime } from "@/lib/utils";
 import { Badge } from "./ui/badge";
 import { Card, CardContent, CardDescription, CardTitle } from "./ui/card";
 
 export const PostCard = ({ post }: { post: Post }) => {
+	const { mutate: upvote, isPending } = useUpvotePost();
+
+	const handleUpvote = () => {
+		upvote(post.id.toString());
+	};
+
 	return (
 		<Card className="flex flex-row items-start justify-start py-3">
 			<button
 				type="button"
+				onClick={handleUpvote}
+				disabled={isPending}
 				className={cn(
-					"ml-3 flex flex-col items-center justify-center text-muted-foreground hover:text-primary",
+					"ml-3 flex cursor-pointer flex-col items-center justify-center text-muted-foreground transition-opacity hover:text-primary",
 					post.isUpvoted ? "text-primary" : "",
+					isPending && "cursor-auto opacity-50",
 				)}
 			>
 				<ChevronUpIcon size={20} />
