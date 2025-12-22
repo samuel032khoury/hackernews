@@ -64,9 +64,18 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 		async (c) => {
 			const { id } = c.req.valid("param");
 			const user = c.get("user");
-			let pointsChange: -1 | 1 = 1;
 
-			const points = await db.transaction(async (tx) => {
+			const result = await db.transaction(async (tx) => {
+				// Verify post exists
+				const [postExists] = await tx
+					.select({ id: posts.id })
+					.from(posts)
+					.where(eq(posts.id, id))
+					.limit(1);
+				if (!postExists)
+					throw new HTTPException(404, { message: "Post not found" });
+
+				// Check if user already upvoted
 				const [existingUpvote] = await tx
 					.select()
 					.from(postUpvotes)
@@ -75,33 +84,35 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 					)
 					.limit(1);
 
-				pointsChange = existingUpvote ? -1 : 1;
-				const [updated] = await tx
-					.update(posts)
-					.set({ points: sql`${posts.points} + ${pointsChange}` })
-					.where(eq(posts.id, id))
-					.returning({ points: posts.points });
-				if (!updated)
-					throw new HTTPException(404, { message: "Post not found" });
+				let isUpvoted: boolean;
 				if (existingUpvote) {
+					// Remove upvote
 					await tx
 						.delete(postUpvotes)
 						.where(eq(postUpvotes.id, existingUpvote.id));
+					isUpvoted = false;
 				} else {
+					// Add upvote
 					await tx.insert(postUpvotes).values({
 						userId: user.id,
 						postId: id,
 					});
+					isUpvoted = true;
 				}
-				return updated.points;
+
+				// Calculate points from upvotes count
+				const [{ points }] = await tx
+					.select({ points: sql<number>`count(*)::int` })
+					.from(postUpvotes)
+					.where(eq(postUpvotes.postId, id));
+
+				return { isUpvoted, points };
 			});
+
 			return c.json<ApiResponse<{ isUpvoted: boolean; points: number }>>({
 				success: true,
 				message: "Post updated successfully",
-				data: {
-					isUpvoted: pointsChange === 1,
-					points,
-				},
+				data: result,
 			});
 		},
 	)
@@ -191,7 +202,11 @@ const publicRoutes = new Hono<AppEnv>()
 					title: posts.title,
 					url: posts.url,
 					content: posts.content,
-					points: posts.points,
+					points: sql<number>`(
+						SELECT COUNT(*)::int
+						FROM ${postUpvotes}
+						WHERE ${postUpvotes.postId} = ${posts.id}
+					)`,
 					commentsCount: posts.commentsCount,
 					createdAt: getISOFormatDateQuery(posts.createdAt),
 					author: {
@@ -349,7 +364,11 @@ const publicRoutes = new Hono<AppEnv>()
 					title: posts.title,
 					url: posts.url,
 					content: posts.content,
-					points: posts.points,
+					points: sql<number>`(
+						SELECT COUNT(*)::int
+						FROM ${postUpvotes}
+						WHERE ${postUpvotes.postId} = ${posts.id}
+					)`,
 					commentsCount: posts.commentsCount,
 					createdAt: getISOFormatDateQuery(posts.createdAt),
 					author: {
