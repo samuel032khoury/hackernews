@@ -78,5 +78,9 @@ export const submitPost = async (
 
 export const upvotePost = async (id: string) => {
 	const res = await api.posts[":id"].upvote.$post({ param: { id } });
-	return await res.json();
+	const data = await res.json();
+	if (!data.success) {
+		throw new Error(data.message);
+	}
+	return data;
 };
