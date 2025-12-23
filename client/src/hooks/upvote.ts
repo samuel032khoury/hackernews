@@ -1,3 +1,4 @@
+import type { PostState } from "@shared/types";
 import type { InfiniteData, QueryClient } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { produce } from "immer";
@@ -6,7 +7,6 @@ import type { PostsPage } from "@/lib/api";
 import { upvotePost } from "@/services/posts";
 
 type PostsInfiniteData = InfiniteData<PostsPage, number>;
-type PostState = { isUpvoted: boolean; points: number };
 
 // ============================================================================
 // Cache Helper Functions

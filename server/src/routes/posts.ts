@@ -4,6 +4,7 @@ import type {
 	Comment,
 	PaginatedResponse,
 	Post,
+	PostState,
 } from "@shared/types";
 import { createCommentSchema } from "@shared/validators/comments.validation";
 import { createPostSchema } from "@shared/validators/posts.validation";
@@ -64,18 +65,9 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 		async (c) => {
 			const { id } = c.req.valid("param");
 			const user = c.get("user");
+			let pointsChange: -1 | 1 = 1;
 
-			const result = await db.transaction(async (tx) => {
-				// Verify post exists
-				const [postExists] = await tx
-					.select({ id: posts.id })
-					.from(posts)
-					.where(eq(posts.id, id))
-					.limit(1);
-				if (!postExists)
-					throw new HTTPException(404, { message: "Post not found" });
-
-				// Check if user already upvoted
+			const points = await db.transaction(async (tx) => {
 				const [existingUpvote] = await tx
 					.select()
 					.from(postUpvotes)
@@ -84,35 +76,33 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 					)
 					.limit(1);
 
-				let isUpvoted: boolean;
+				pointsChange = existingUpvote ? -1 : 1;
+				const [updated] = await tx
+					.update(posts)
+					.set({ points: sql`${posts.points} + ${pointsChange}` })
+					.where(eq(posts.id, id))
+					.returning({ points: posts.points });
+				if (!updated)
+					throw new HTTPException(404, { message: "Post not found" });
 				if (existingUpvote) {
-					// Remove upvote
 					await tx
 						.delete(postUpvotes)
 						.where(eq(postUpvotes.id, existingUpvote.id));
-					isUpvoted = false;
 				} else {
-					// Add upvote
 					await tx.insert(postUpvotes).values({
 						userId: user.id,
 						postId: id,
 					});
-					isUpvoted = true;
 				}
-
-				// Calculate points from upvotes count
-				const [{ points }] = await tx
-					.select({ points: sql<number>`count(*)::int` })
-					.from(postUpvotes)
-					.where(eq(postUpvotes.postId, id));
-
-				return { isUpvoted, points };
+				return updated.points;
 			});
-
-			return c.json<ApiResponse<{ isUpvoted: boolean; points: number }>>({
+			return c.json<ApiResponse<PostState>>({
 				success: true,
 				message: "Post updated successfully",
-				data: result,
+				data: {
+					isUpvoted: pointsChange === 1,
+					points,
+				},
 			});
 		},
 	)

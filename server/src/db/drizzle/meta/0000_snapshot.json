@@ -1,5 +1,5 @@
 {
-  "id": "b24faa14-0fc9-4d86-8605-ade3ba260cb2",
+  "id": "894265d8-c61f-410a-9a23-00ca5dd05b7a",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -462,7 +462,12 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
-      "checkConstraints": {},
+      "checkConstraints": {
+        "points_non_negative": {
+          "name": "points_non_negative",
+          "value": "\"posts\".\"points\" >= 0"
+        }
+      },
       "isRLSEnabled": false
     },
     "public.comment_upvotes": {
