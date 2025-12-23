@@ -202,11 +202,7 @@ const publicRoutes = new Hono<AppEnv>()
 					title: posts.title,
 					url: posts.url,
 					content: posts.content,
-					points: sql<number>`(
-						SELECT COUNT(*)::int
-						FROM ${postUpvotes}
-						WHERE ${postUpvotes.postId} = ${posts.id}
-					)`,
+					points: posts.points,
 					commentsCount: posts.commentsCount,
 					createdAt: getISOFormatDateQuery(posts.createdAt),
 					author: {
@@ -364,11 +360,7 @@ const publicRoutes = new Hono<AppEnv>()
 					title: posts.title,
 					url: posts.url,
 					content: posts.content,
-					points: sql<number>`(
-						SELECT COUNT(*)::int
-						FROM ${postUpvotes}
-						WHERE ${postUpvotes.postId} = ${posts.id}
-					)`,
+					points: posts.points,
 					commentsCount: posts.commentsCount,
 					createdAt: getISOFormatDateQuery(posts.createdAt),
 					author: {
