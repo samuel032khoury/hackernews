@@ -68,7 +68,6 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 
 			const points = await db.transaction(async (tx) => {
 				// Use INSERT ... ON CONFLICT to atomically toggle the upvote
-				// This prevents race conditions by relying on unique constraint
 				const [result] = await tx
 					.insert(postUpvotes)
 					.values({
@@ -83,7 +82,7 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 				const isNewUpvote = !!result;
 				const pointsChange = isNewUpvote ? 1 : -1;
 
-				// If no result, the upvote existed, so delete it
+				// If upvote existed, delete it
 				if (!isNewUpvote) {
 					await tx
 						.delete(postUpvotes)
