@@ -65,44 +65,50 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 		async (c) => {
 			const { id } = c.req.valid("param");
 			const user = c.get("user");
-			let pointsChange: -1 | 1 = 1;
 
 			const points = await db.transaction(async (tx) => {
-				const [existingUpvote] = await tx
-					.select()
-					.from(postUpvotes)
-					.where(
-						and(eq(postUpvotes.userId, user.id), eq(postUpvotes.postId, id)),
-					)
-					.limit(1);
+				// Use INSERT ... ON CONFLICT to atomically toggle the upvote
+				// This prevents race conditions by relying on unique constraint
+				const [result] = await tx
+					.insert(postUpvotes)
+					.values({
+						userId: user.id,
+						postId: id,
+					})
+					.onConflictDoNothing({
+						target: [postUpvotes.userId, postUpvotes.postId],
+					})
+					.returning({ id: postUpvotes.id });
 
-				pointsChange = existingUpvote ? -1 : 1;
+				const isNewUpvote = !!result;
+				const pointsChange = isNewUpvote ? 1 : -1;
+
+				// If no result, the upvote existed, so delete it
+				if (!isNewUpvote) {
+					await tx
+						.delete(postUpvotes)
+						.where(
+							and(eq(postUpvotes.userId, user.id), eq(postUpvotes.postId, id)),
+						);
+				}
+
+				// Update points atomically
 				const [updated] = await tx
 					.update(posts)
 					.set({ points: sql`${posts.points} + ${pointsChange}` })
 					.where(eq(posts.id, id))
 					.returning({ points: posts.points });
+
 				if (!updated)
 					throw new HTTPException(404, { message: "Post not found" });
-				if (existingUpvote) {
-					await tx
-						.delete(postUpvotes)
-						.where(eq(postUpvotes.id, existingUpvote.id));
-				} else {
-					await tx.insert(postUpvotes).values({
-						userId: user.id,
-						postId: id,
-					});
-				}
-				return updated.points;
+
+				return { points: updated.points, isUpvoted: isNewUpvote };
 			});
+
 			return c.json<ApiResponse<PostState>>({
 				success: true,
 				message: "Post updated successfully",
-				data: {
-					isUpvoted: pointsChange === 1,
-					points,
-				},
+				data: points,
 			});
 		},
 	)

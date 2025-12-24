@@ -7,7 +7,7 @@ import { Badge } from "./ui/badge";
 import { Card, CardContent, CardDescription, CardTitle } from "./ui/card";
 
 export const PostCard = ({ post }: { post: Post }) => {
-	const { mutate: upvote, isPending } = useUpvotePost();
+	const { mutate: upvote } = useUpvotePost();
 
 	const handleUpvote = () => {
 		upvote(post.id.toString());
@@ -18,11 +18,9 @@ export const PostCard = ({ post }: { post: Post }) => {
 			<button
 				type="button"
 				onClick={handleUpvote}
-				disabled={isPending}
 				className={cn(
-					"ml-3 flex cursor-pointer flex-col items-center justify-center text-muted-foreground transition-opacity hover:text-primary",
-					post.isUpvoted ? "text-primary" : "",
-					isPending && "cursor-auto opacity-50",
+					"ml-3 flex cursor-pointer flex-col items-center justify-center transition-opacity",
+					post.isUpvoted ? "text-primary" : "text-muted-foreground",
 				)}
 			>
 				<ChevronUpIcon size={20} />
