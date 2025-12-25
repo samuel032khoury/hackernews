@@ -24,6 +24,7 @@
 		}
 	},
 	"include": ["src"],
+	"exclude": ["vite.config.ts"],
 	"references": [
 		{ "path": "./tsconfig.vite.json" },
 		{ "path": "../shared" },
