@@ -41,7 +41,7 @@ server/
 │   │   ├── auth.ts              # BetterAuth configuration
 │   │   ├── env.ts               # Environment & type definitions
 │   │   └── utils.ts             # SQL utility functions
-│   ├── middleware/
+│   ├── middlewares/
 │   │   ├── authHandler.ts       # Session extraction middleware
 │   │   ├── requireAuth.ts       # Protected route guard
 │   │   └── errorHandler.ts      # Global error handler
@@ -49,11 +49,6 @@ server/
 │   │   ├── auth.ts              # Auth routes (BetterAuth proxy)
 │   │   ├── posts.ts             # Posts CRUD & interactions
 │   │   └── comments.ts          # Comments CRUD & interactions
-│   └── validators/
-│       ├── index.ts             # Validation utilities
-│       ├── posts.validation.ts  # Post creation schema
-│       ├── comments.validation.ts # Comment creation schema
-│       └── query.validation.ts  # Pagination & sorting schema
 ├── drizzle.config.ts            # Drizzle Kit configuration
 ├── package.json
 └── tsconfig.json
@@ -128,10 +123,12 @@ erDiagram
     
     users {
         string id PK
+        string username
+        string displayUsername
         string email
         string name
         string image
-        datetime emailVerified
+        boolean emailVerified
         datetime createdAt
     }
     
@@ -140,8 +137,10 @@ erDiagram
         string id PK
         string userId FK
         string title
+        string url
         string content
-        int upvoteCount
+        int points
+        int commentsCount
         datetime createdAt
     }
     
@@ -151,7 +150,9 @@ erDiagram
         string postId FK
         string parentId FK
         string content
-        int upvoteCount
+        int points
+        int depth
+        int commentCount
         datetime createdAt
     }
     
@@ -176,6 +177,8 @@ erDiagram
 | Column | Type | Description |
 |--------|------|-------------|
 | id | text | Primary key |
+| username | text | Unique username |
+| displayUsername | text | Displaying username |
 | name | text | Display name |
 | email | text | Unique email |
 | emailVerified | boolean | Email verification status |
@@ -230,9 +233,9 @@ BetterAuth handles all auth routes automatically. Key endpoints include:
 | Method | Path | Description |
 |--------|------|-------------|
 | POST | `/auth/sign-up/email` | Email/password registration |
-| POST | `/auth/sign-in/email` | Email/password login |
+| POST | `/auth/sign-in/username` | Username login |
 | POST | `/auth/sign-out` | Sign out |
-| GET | `/auth/session` | Get current session |
+| GET | `/auth/get-session` | Get current session |
 | GET | `/auth/reference` | OpenAPI documentation |
 
 ---
@@ -285,7 +288,7 @@ Create a new post.
 #### `POST /posts/:id/upvote` 🔒
 Toggle upvote on a post. If already upvoted, removes the upvote.
 
-**Response:** `ApiResponse<{ isUpvoted: boolean; points: number }>`
+**Response:** `ApiResponse<PostState>`
 
 **Errors:**
 - `404` - Post not found
@@ -364,34 +367,97 @@ Toggle upvote on a comment.
 
 ## Response Types
 
+All response types are defined in the `shared` workspace package and can be imported from `shared/types`.
+
 ### Success Response
 ```typescript
-interface ApiResponse<T> {
+type SuccessResponse<T = void> = {
   success: true;
   message: string;
-  data: T;
-}
+} & (T extends void ? object : { data: T });
+```
+
+### Api Response
+```typescript
+type ApiResponse<T = void> = SuccessResponse<T> | ErrorResponse;
 ```
 
 ### Paginated Response
 ```typescript
-interface PaginatedResponse<T> extends ApiResponse<T> {
-  pagination: {
-    page: number;
-    totalPages: number;
-  };
-}
+type PaginatedResponse<T> =
+  | (SuccessResponse<Array<T>> & {
+      pagination: {
+        totalPages: number;
+        page: number;
+      };
+    })
+  | ErrorResponse;
 ```
 
 ### Error Response
 ```typescript
-interface ApiError {
+type ErrorResponse = ApiError | ValidationError;
+
+type ApiError = {
   success: false;
-  error: string | {
-    name: string;
-    issues: ZodIssue[];
+  message: string;
+  code?: string;
+};
+```
+
+### Validation Error
+```typescript
+type ValidationError = {
+  success: false;
+  code: "VALIDATION_ERROR";
+  message: string;
+  issues: ValidationIssue[];
+};
+
+type ValidationIssue = {
+  path: PropertyKey[];
+  message: string;
+};
+```
+
+### Data Types
+```typescript
+interface Post {
+  id: number;
+  title: string;
+  url: string | null;
+  content: string | null;
+  points: number;
+  commentsCount: number;
+  createdAt: string;
+  author: {
+    id: string;
+    username: string;
   };
-  isFormError?: boolean;
+  isUpvoted: boolean;
+}
+
+interface Comment {
+  id: number;
+  userId: string;
+  postId: number;
+  content: string;
+  points: number;
+  depth: number;
+  parentCommentId: number | null;
+  createdAt: string;
+  commentCount: number;
+  commentUpvotes: { userId: string }[];
+  childComments?: Comment[];
+  author: {
+    id: string;
+    username: string;
+  };
+}
+
+interface PostState {
+  isUpvoted: boolean;
+  points: number;
 }
 ```
 
@@ -418,8 +484,8 @@ Comments support infinite nesting via self-referential `parentCommentId`. The `d
 ### 4. Denormalized Counters
 `posts.commentsCount` and `comments.commentCount` are denormalized counters updated during transactions. This trades write complexity for read performance.
 
-### 5. Zod Validation with throwOnError
-All validators use a centralized `throwOnError` callback that throws validation errors to be caught by the global error handler, providing consistent error responses.
+### 5. Zod Validation with throwValidationError
+All validators use a centralized `throwValidationError` callback that throws validation errors to be caught by the global error handler, providing consistent error responses.
 
 ### 6. ISO Date Formatting at Database Level
 The `getISOFormatDateQuery` utility formats timestamps to ISO 8601 strings in SQL queries, ensuring consistent date formatting without JavaScript overhead.
@@ -477,3 +543,4 @@ import { hc } from "hono/client";
 
 const client = hc<AppType>("/api");
 ```
+

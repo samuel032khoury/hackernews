@@ -7,7 +7,7 @@ node_modules
 coverage
 
 # bruno
-.bruno
+bruno
 
 # production
 dist
