@@ -11,7 +11,6 @@ export const Route = createFileRoute("/post")({
 
 function Post() {
 	const { id } = Route.useSearch();
-	// get data with suspense
 	const { data } = useSuspenseQuery(postQueryOptions(id));
 	return (
 		<div className="mx-auto max-w-3xl">

@@ -13,7 +13,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
 	const { page, limit, sortBy, order, author, site } = Route.useSearch();
-	const { data, isFetchingNextPage, fetchNextPage, hasNextPage } =
+	const { data, isFetchingNextPage, isFetching, fetchNextPage, hasNextPage } =
 		useSuspenseInfiniteQuery(
 			postsInfiniteQueryOptions({ page, limit, sortBy, order, author, site }),
 		);
@@ -29,7 +29,7 @@ function Index() {
 			<div className="mt-6 flex justify-center">
 				<Button
 					onClick={() => fetchNextPage()}
-					disabled={!hasNextPage || isFetchingNextPage}
+					disabled={!hasNextPage || isFetching}
 				>
 					{isFetchingNextPage
 						? "Loading more..."

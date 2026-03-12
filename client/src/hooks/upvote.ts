@@ -22,7 +22,7 @@ type PostDetailsCacheData = SuccessOf<ApiResponse<Post>>;
 
 const findPostInListCache = (data: PostsListCacheData, postId: string) => {
 	for (const page of data.pages) {
-		const post = page.data.find((p) => p.id === Number(postId));
+		const post = page.data.find((p) => p.id.toString() === postId);
 		if (post) return post;
 	}
 	return null;
@@ -61,26 +61,25 @@ const postDetailAdapter: CacheAdapter = {
 	read(queryClient, postId) {
 		const data = queryClient.getQueryData<PostDetailsCacheData>([
 			"post",
-			Number(postId),
+			postId,
 		]);
 		if (!data?.data) return null;
 		return { isUpvoted: data.data.isUpvoted, points: data.data.points };
 	},
 
 	write(queryClient, postId, update) {
-		queryClient.setQueryData<PostDetailsCacheData>(
-			["post", Number(postId)],
-			(old) => (old ? { ...old, data: { ...old.data, ...update } } : old),
+		queryClient.setQueryData<PostDetailsCacheData>(["post", postId], (old) =>
+			old ? { ...old, data: { ...old.data, ...update } } : old,
 		);
 	},
 
 	async cancel(queryClient, postId) {
-		await queryClient.cancelQueries({ queryKey: ["post", Number(postId)] });
+		await queryClient.cancelQueries({ queryKey: ["post", postId] });
 	},
 
 	invalidate(queryClient, postId) {
 		queryClient.invalidateQueries({
-			queryKey: ["post", Number(postId)],
+			queryKey: ["post", postId],
 			refetchType: "none",
 		});
 	},

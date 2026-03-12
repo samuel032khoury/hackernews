@@ -1,5 +1,9 @@
 import type { paginationSchema } from "@shared/validators/search.validation";
-import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
+import {
+	infiniteQueryOptions,
+	keepPreviousData,
+	queryOptions,
+} from "@tanstack/react-query";
 import { notFound } from "@tanstack/react-router";
 import type z from "zod";
 import { api } from "@/lib/api";
@@ -13,8 +17,9 @@ export const postsInfiniteQueryOptions = ({
 }: z.infer<typeof paginationSchema>) =>
 	infiniteQueryOptions({
 		queryKey: ["posts", sortBy, order, author, site],
-		queryFn: ({ pageParam }) =>
-			getAllPosts({ page: pageParam, limit, sortBy, order, author, site }),
+		queryFn: ({ pageParam: page }) =>
+			getAllPosts({ page, limit, sortBy, order, author, site }),
+		placeholderData: keepPreviousData,
 		initialPageParam: 1,
 		staleTime: Infinity,
 		getNextPageParam: (lastPage, _, lastPageParam) => {
@@ -25,7 +30,7 @@ export const postsInfiniteQueryOptions = ({
 		},
 	});
 
-export const postQueryOptions = (id: number) =>
+export const postQueryOptions = (id: string) =>
 	queryOptions({
 		queryKey: ["post", id],
 		queryFn: () => getPost(id),
@@ -34,7 +39,7 @@ export const postQueryOptions = (id: number) =>
 		throwOnError: true,
 	});
 
-export const getAllPosts = async ({
+const getAllPosts = async ({
 	page = 1,
 	sortBy,
 	order,
@@ -58,8 +63,8 @@ export const getAllPosts = async ({
 	}
 };
 
-export const getPost = async (id: number) => {
-	const res = await api.posts[":id"].$get({ param: { id: id.toString() } });
+const getPost = async (id: string) => {
+	const res = await api.posts[":id"].$get({ param: { id } });
 	const data = await res.json();
 	if (data.success) {
 		return data;

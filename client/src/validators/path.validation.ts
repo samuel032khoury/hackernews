@@ -9,7 +9,7 @@ export const pathRedirectSchema = z.object({
 });
 
 export const pathPostSchema = z.object({
-	id: z.number().catch(0).default(0),
+	id: z.coerce.string().catch("0").default("0"),
 	sortBy: sortBySchema.catch("points").default("points"),
 	order: orderSchema.catch("desc").default("desc"),
 });
