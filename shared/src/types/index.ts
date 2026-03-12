@@ -16,7 +16,7 @@ export type PaginatedResponse<T> =
 	  })
 	| ErrorResponse;
 
-export type ValidationIssue = {
+type ValidationIssue = {
 	path: PropertyKey[];
 	message: string;
 };

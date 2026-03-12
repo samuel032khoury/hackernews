@@ -4,12 +4,16 @@ import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Toaster } from "sonner";
 import { Header } from "@/components/header";
+import { currentUserQueryOptions } from "@/services/users";
 
 interface AppRouterContext {
 	queryClient: QueryClient;
 }
 
 export const Route = createRootRouteWithContext<AppRouterContext>()({
+	beforeLoad: async ({ context }) => {
+		await context.queryClient.ensureQueryData(currentUserQueryOptions);
+	},
 	component: () => (
 		<>
 			<div className="flex min-h-screen flex-col bg-[#f5f5ed] text-foreground">

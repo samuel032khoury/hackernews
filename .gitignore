@@ -6,8 +6,8 @@ node_modules
 # testing
 coverage
 
-# bruno
-bruno
+# http
+*.http
 
 # production
 dist
