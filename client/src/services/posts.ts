@@ -1,5 +1,6 @@
 import type { paginationSchema } from "@shared/validators/search.validation";
-import { infiniteQueryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
+import { notFound } from "@tanstack/react-router";
 import type z from "zod";
 import { api } from "@/lib/api";
 
@@ -22,6 +23,15 @@ export const postsInfiniteQueryOptions = ({
 			}
 			return lastPageParam + 1;
 		},
+	});
+
+export const postQueryOptions = (id: number) =>
+	queryOptions({
+		queryKey: ["post", id],
+		queryFn: () => getPost(id),
+		staleTime: Infinity,
+		retry: false,
+		throwOnError: true,
 	});
 
 export const getAllPosts = async ({
@@ -54,6 +64,9 @@ export const getPost = async (id: number) => {
 	if (data.success) {
 		return data;
 	} else {
+		if (res.status === 404) {
+			throw notFound();
+		}
 		throw new Error(data.message);
 	}
 };

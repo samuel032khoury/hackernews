@@ -1,19 +1,26 @@
-import type { PostState } from "@shared/types";
+import type {
+	ApiResponse,
+	PaginatedResponse,
+	Post,
+	PostState,
+} from "@shared/types";
 import type { InfiniteData, QueryClient } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { produce } from "immer";
 import { useRef } from "react";
 import { toast } from "sonner";
-import type { PostsPage } from "@/lib/api";
 import { upvotePost } from "@/services/posts";
 
-type PostsInfiniteData = InfiniteData<PostsPage, number>;
+type SuccessOf<T> = Extract<T, { success: true }>;
+type PostsPageSuccess = SuccessOf<PaginatedResponse<Post>>;
+type PostsListCacheData = InfiniteData<PostsPageSuccess, number>;
+type PostDetailsCacheData = SuccessOf<ApiResponse<Post>>;
 
 // ============================================================================
-// Cache Helper Functions
+// Cache Shape Helpers
 // ============================================================================
 
-const findPost = (data: PostsInfiniteData, postId: string) => {
+const findPostInListCache = (data: PostsListCacheData, postId: string) => {
 	for (const page of data.pages) {
 		const post = page.data.find((p) => p.id === Number(postId));
 		if (post) return post;
@@ -21,13 +28,13 @@ const findPost = (data: PostsInfiniteData, postId: string) => {
 	return null;
 };
 
-const updatePostInCache = (
-	data: PostsInfiniteData,
+const updatePostInListCache = (
+	data: PostsListCacheData,
 	postId: string,
 	update: PostState,
-): PostsInfiniteData => {
+): PostsListCacheData => {
 	return produce(data, (draft) => {
-		const post = findPost(draft, postId);
+		const post = findPostInListCache(draft, postId);
 		if (post) {
 			post.isUpvoted = update.isUpvoted;
 			post.points = update.points;
@@ -35,34 +42,136 @@ const updatePostInCache = (
 	});
 };
 
-const getPreviousPostState = (
+// ============================================================================
+// Adapter Type
+// ============================================================================
+
+type CacheAdapter = {
+	read: (queryClient: QueryClient, postId: string) => PostState | null;
+	write: (queryClient: QueryClient, postId: string, update: PostState) => void;
+	cancel: (queryClient: QueryClient, postId: string) => Promise<void>;
+	invalidate: (queryClient: QueryClient, postId: string) => void;
+};
+
+// ============================================================================
+// Adapters
+// ============================================================================
+
+const postDetailAdapter: CacheAdapter = {
+	read(queryClient, postId) {
+		const data = queryClient.getQueryData<PostDetailsCacheData>([
+			"post",
+			Number(postId),
+		]);
+		if (!data?.data) return null;
+		return { isUpvoted: data.data.isUpvoted, points: data.data.points };
+	},
+
+	write(queryClient, postId, update) {
+		queryClient.setQueryData<PostDetailsCacheData>(
+			["post", Number(postId)],
+			(old) => (old ? { ...old, data: { ...old.data, ...update } } : old),
+		);
+	},
+
+	async cancel(queryClient, postId) {
+		await queryClient.cancelQueries({ queryKey: ["post", Number(postId)] });
+	},
+
+	invalidate(queryClient, postId) {
+		queryClient.invalidateQueries({
+			queryKey: ["post", Number(postId)],
+			refetchType: "none",
+		});
+	},
+};
+
+const postsListAdapter: CacheAdapter = {
+	read(queryClient, postId) {
+		const entries = queryClient.getQueriesData<PostsListCacheData>({
+			queryKey: ["posts"],
+		});
+		for (const [, data] of entries) {
+			if (!data) continue;
+			const post = findPostInListCache(data, postId);
+			if (post) return { isUpvoted: post.isUpvoted, points: post.points };
+		}
+		return null;
+	},
+
+	write(queryClient, postId, update) {
+		queryClient.setQueriesData<PostsListCacheData>(
+			{ queryKey: ["posts"] },
+			(old) => (old ? updatePostInListCache(old, postId, update) : old),
+		);
+	},
+
+	async cancel(queryClient) {
+		await queryClient.cancelQueries({ queryKey: ["posts"] });
+	},
+
+	invalidate(queryClient) {
+		queryClient.invalidateQueries({
+			queryKey: ["posts"],
+			refetchType: "none",
+		});
+	},
+};
+
+// ============================================================================
+// Adapter Registry (order matters — most specific first)
+// ============================================================================
+
+const cacheAdapters: CacheAdapter[] = [postDetailAdapter, postsListAdapter];
+
+// ============================================================================
+// Registry Helpers
+// ============================================================================
+
+const getPostStateFromCache = (
 	queryClient: QueryClient,
 	postId: string,
 ): PostState | null => {
-	const queries = queryClient.getQueriesData<PostsInfiniteData>({
-		queryKey: ["posts"],
-	});
-
-	for (const [, data] of queries) {
-		if (data) {
-			const post = findPost(data, postId);
-			if (post) {
-				return { isUpvoted: post.isUpvoted, points: post.points };
-			}
-		}
+	for (const adapter of cacheAdapters) {
+		const state = adapter.read(queryClient, postId);
+		if (state) return state;
 	}
 	return null;
 };
 
-// // ============================================================================
-// // Hook
-// // ============================================================================
+const writePostStateToAllCaches = (
+	queryClient: QueryClient,
+	postId: string,
+	update: PostState,
+) => {
+	for (const adapter of cacheAdapters) {
+		adapter.write(queryClient, postId, update);
+	}
+};
+
+const cancelAllCacheQueries = async (
+	queryClient: QueryClient,
+	postId: string,
+) => {
+	await Promise.all(
+		cacheAdapters.map((adapter) => adapter.cancel(queryClient, postId)),
+	);
+};
+
+const invalidateAllCaches = (queryClient: QueryClient, postId: string) => {
+	cacheAdapters.forEach((adapter) => {
+		adapter.invalidate(queryClient, postId);
+	});
+};
+
+// ============================================================================
+// Hook
+// ============================================================================
 
 export const useUpvotePost = () => {
 	const queryClient = useQueryClient();
 
-	// Track Pending Requests & Previous State
-	const postTracker = useRef(
+	const postMutationState = useRef(
 		new Map<string, { pendingRequests: number; prevState: PostState | null }>(),
 	);
 
@@ -71,93 +180,66 @@ export const useUpvotePost = () => {
 		mutationFn: upvotePost,
 
 		onMutate: async (postId: string) => {
-			await queryClient.cancelQueries({ queryKey: ["posts"] });
+			await cancelAllCacheQueries(queryClient, postId);
 
-			const currentPost = postTracker.current.get(postId) || {
-				pendingRequests: 0,
-				prevState: null,
-			};
+			const tracked = postMutationState.current.get(postId);
 
-			// Capture the synced server state only on the first click of a burst
-			const currentState = getPreviousPostState(queryClient, postId);
-			const prevState =
-				currentPost.pendingRequests === 0
-					? currentState
-					: currentPost.prevState;
+			if (!tracked) {
+				postMutationState.current.set(postId, {
+					pendingRequests: 1,
+					prevState: getPostStateFromCache(queryClient, postId),
+				});
+			} else {
+				tracked.pendingRequests += 1;
+			}
 
-			postTracker.current.set(postId, {
-				pendingRequests: currentPost.pendingRequests + 1,
-				prevState,
-			});
-
-			// Apply Optimistic Update
-			if (currentState) {
-				const toggledState: PostState = {
-					isUpvoted: !currentState.isUpvoted,
-					points: currentState.points + (currentState.isUpvoted ? -1 : 1),
-				};
-
-				queryClient.setQueriesData<PostsInfiniteData>(
-					{ queryKey: ["posts"] },
-					(old) => (old ? updatePostInCache(old, postId, toggledState) : old),
-				);
+			const currentPostState = getPostStateFromCache(queryClient, postId);
+			if (currentPostState) {
+				writePostStateToAllCaches(queryClient, postId, {
+					isUpvoted: !currentPostState.isUpvoted,
+					points:
+						currentPostState.points + (currentPostState.isUpvoted ? -1 : 1),
+				});
 			}
 		},
 
 		onSuccess: (response, postId) => {
-			const state = postTracker.current.get(postId);
-
+			const state = postMutationState.current.get(postId);
 			if (!state) return;
 
 			state.pendingRequests -= 1;
-
-			// Update the prevState to the server response
 			state.prevState = response.data;
 
-			// If it's the last pending request, update the cache
 			if (state.pendingRequests === 0) {
-				queryClient.setQueriesData<PostsInfiniteData>(
-					{ queryKey: ["posts"] },
-					(old) => (old ? updatePostInCache(old, postId, response.data) : old),
-				);
-				postTracker.current.delete(postId);
+				writePostStateToAllCaches(queryClient, postId, response.data);
+				postMutationState.current.delete(postId);
 			}
 		},
 
 		onError: (_err, postId) => {
 			toast.error("An error occurred", {
-				description: "Failed to update upvote. Please try again.",
+				description: "gFailed to update upvote. Please try aain.",
 				icon: "⚠️",
 			});
 
-			const state = postTracker.current.get(postId);
-
+			const state = postMutationState.current.get(postId);
 			if (!state) return;
 
 			state.pendingRequests -= 1;
 
 			if (state.pendingRequests === 0) {
 				const { prevState } = state;
-
 				if (prevState) {
-					queryClient.setQueriesData<PostsInfiniteData>(
-						{ queryKey: ["posts"] },
-						(old) => (old ? updatePostInCache(old, postId, prevState) : old),
-					);
+					writePostStateToAllCaches(queryClient, postId, prevState);
 				}
-				postTracker.current.delete(postId);
+				postMutationState.current.delete(postId);
 			}
 		},
 
 		onSettled: (_data, _error, postId) => {
-			const state = postTracker.current.get(postId);
-
-			// Only invalidate if no more clicks are pending
-			if (!state || state.pendingRequests === 0) {
-				queryClient.invalidateQueries({
-					queryKey: ["posts"],
-					refetchType: "none",
-				});
+			const isLastRequest = !postMutationState.current.has(postId);
+			if (isLastRequest) {
+				invalidateAllCaches(queryClient, postId);
 			}
 		},
 	});
