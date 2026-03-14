@@ -26,7 +26,7 @@ export function CommentThread({
 }: CommentThreadProps) {
 	const { currentUser } = useCurrentUser();
 	const [isCollapsed, setIsCollapsed] = useState(false);
-	const isUpvoted = comment.commentUpvotes.length > 0;
+	const isUpvoted = comment.isUpvoted;
 	const isReplying = activeReplyId === comment.id;
 
 	return (

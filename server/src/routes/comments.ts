@@ -9,7 +9,11 @@ import z from "zod";
 import { db } from "@/db";
 import { comments, commentUpvotes, posts, users } from "@/db/schema";
 import type { AppEnv, ProtectedEnv } from "@/lib/env";
-import { getISOFormatDateQuery, throwValidationError } from "@/lib/utils";
+import {
+	getCommentIsUpvotedQuery,
+	getISOFormatDateQuery,
+	throwValidationError,
+} from "@/lib/utils";
 import requireAuth from "@/middlewares/requireAuth";
 
 const publicRoutes = new Hono<AppEnv>().get(
@@ -48,16 +52,12 @@ const publicRoutes = new Hono<AppEnv>().get(
 						username: true,
 					},
 				},
-				commentUpvotes: {
-					columns: {
-						userId: true,
-					},
-					where: eq(commentUpvotes.userId, user?.id ?? ""),
-					limit: 1,
-				},
 			},
 			extras: {
 				createdAt: getISOFormatDateQuery(comments.createdAt).as("created_at"),
+				isUpvoted: getCommentIsUpvotedQuery(comments.id, user?.id).as(
+					"is_upvoted",
+				),
 			},
 		});
 		return c.json<PaginatedResponse<Comment>>({
@@ -151,7 +151,7 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 				message: "Comment created successfully",
 				data: {
 					...result,
-					commentUpvotes: [] as { userId: string }[],
+					isUpvoted: false,
 					childComments: [] as Comment[],
 					author: {
 						id: user.id,
@@ -208,14 +208,12 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 				}
 				return updated.points;
 			});
-			return c.json<
-				ApiResponse<{ commentUpvotes: { userId: string }[]; points: number }>
-			>(
+			return c.json<ApiResponse<{ isUpvoted: boolean; points: number }>>(
 				{
 					success: true,
 					message: "Comment updated successfully",
 					data: {
-						commentUpvotes: pointsChange === 1 ? [{ userId: user.id }] : [],
+						isUpvoted: pointsChange === 1,
 						points,
 					},
 				},

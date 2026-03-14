@@ -44,7 +44,7 @@ export interface Comment {
 	parentCommentId: number | null;
 	createdAt: string;
 	commentCount: number;
-	commentUpvotes: { userId: string }[];
+	isUpvoted: boolean;
 	childComments?: Comment[];
 	author: {
 		id: string;
