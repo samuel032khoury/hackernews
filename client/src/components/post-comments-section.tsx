@@ -1,0 +1,46 @@
+import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
+import { getRouteApi } from "@tanstack/react-router";
+import { useState } from "react";
+import { commentsInfiniteQueryOptions } from "@/services/comments";
+import { CommentThread } from "./comment-thread";
+import { SortBar } from "./sort-bar";
+import { Card, CardContent } from "./ui/card";
+
+const postRouteApi = getRouteApi("/post");
+
+export const PostCommentsSection = ({ postId }: { postId: string }) => {
+	const { sortBy, order } = postRouteApi.useSearch();
+	const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
+	const { data: comments } = useSuspenseInfiniteQuery(
+		commentsInfiniteQueryOptions({ id: postId, sortBy, order }),
+	);
+
+	return (
+		<>
+			<div className="mt-8 mb-4">
+				<h2 className="mb-2 font-bold text-foreground text-lg">Comments</h2>
+				{comments.pages[0].data.length > 0 && (
+					<SortBar sortBy={sortBy} order={order} />
+				)}
+			</div>
+			{comments.pages[0].data.length > 0 && (
+				<Card>
+					<CardContent className="px-4">
+						{comments.pages.map((page) =>
+							page.data.map((comment, index) => (
+								<CommentThread
+									key={comment.id}
+									comment={comment}
+									depth={0}
+									activeReplyId={activeReplyId}
+									setActiveReplyId={setActiveReplyId}
+									isLast={index === page.data.length - 1}
+								/>
+							)),
+						)}
+					</CardContent>
+				</Card>
+			)}
+		</>
+	);
+};

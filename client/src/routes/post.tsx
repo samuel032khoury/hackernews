@@ -1,6 +1,7 @@
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { PostCard } from "@/components/post-card";
+import { PostCommentsSection } from "@/components/post-comments-section";
 import { postQueryOptions } from "@/services/posts";
 import { pathSearchSchema } from "@/validators/path.validation";
 
@@ -15,6 +16,7 @@ function Post() {
 	return (
 		<div className="mx-auto max-w-3xl">
 			{data && <PostCard post={data.data} />}
+			<PostCommentsSection postId={id} />
 		</div>
 	);
 }
