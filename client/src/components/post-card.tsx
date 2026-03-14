@@ -1,6 +1,7 @@
 import type { Post } from "@shared/types";
 import { Link } from "@tanstack/react-router";
 import { ChevronUpIcon } from "lucide-react";
+import { useCurrentUser } from "@/contexts/current-user-context";
 import { useUpvotePost } from "@/hooks/upvote";
 import { cn, relativeTime } from "@/lib/utils";
 import { Badge } from "./ui/badge";
@@ -8,8 +9,12 @@ import { Card, CardContent, CardDescription, CardTitle } from "./ui/card";
 
 export const PostCard = ({ post }: { post: Post }) => {
 	const { mutate: upvote } = useUpvotePost();
+	const { currentUser } = useCurrentUser();
 
 	const handleUpvote = () => {
+		if (!currentUser) {
+			return;
+		}
 		upvote(post.id.toString());
 	};
 
@@ -18,8 +23,10 @@ export const PostCard = ({ post }: { post: Post }) => {
 			<button
 				type="button"
 				onClick={handleUpvote}
+				disabled={!currentUser}
 				className={cn(
-					"ml-3 flex cursor-pointer flex-col items-center justify-center transition-opacity",
+					"ml-3 flex flex-col items-center justify-center transition-opacity",
+					currentUser ? "cursor-pointer" : "cursor-not-allowed opacity-60",
 					post.isUpvoted ? "text-primary" : "text-muted-foreground",
 				)}
 			>

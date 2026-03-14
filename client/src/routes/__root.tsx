@@ -4,6 +4,7 @@ import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { Toaster } from "sonner";
 import { Header } from "@/components/header";
+import { CurrentUserProvider } from "@/contexts/current-user-context";
 import { currentUserQueryOptions } from "@/services/users";
 
 interface AppRouterContext {
@@ -15,7 +16,7 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
 		await context.queryClient.ensureQueryData(currentUserQueryOptions);
 	},
 	component: () => (
-		<>
+		<CurrentUserProvider>
 			<div className="flex min-h-screen flex-col bg-[#f5f5ed] text-foreground">
 				<Header />
 				<main className="container mx-auto grow p-4">
@@ -30,6 +31,6 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
 			<Toaster />
 			<TanStackRouterDevtools />
 			<ReactQueryDevtools />
-		</>
+		</CurrentUserProvider>
 	),
 });

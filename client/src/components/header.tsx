@@ -1,10 +1,10 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { MenuIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useCurrentUser } from "@/contexts/current-user-context";
 import { authClient } from "@/lib/auth-client";
-import { currentUserQueryOptions } from "@/services/users";
 import { Button } from "./ui/button";
 import {
 	Sheet,
@@ -20,7 +20,7 @@ export function Header() {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const queryClient = useQueryClient();
-	const { data: currentUser } = useQuery(currentUserQueryOptions);
+	const { currentUser } = useCurrentUser();
 	const [sheetOpen, setSheetOpen] = useState(false);
 
 	const isAuthPage =
