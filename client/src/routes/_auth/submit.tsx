@@ -41,6 +41,7 @@ function Submit() {
 				form.reset();
 				await router.navigate({
 					to: "/post",
+					replace: true,
 					search: { id: res.data.postId },
 				});
 				return;

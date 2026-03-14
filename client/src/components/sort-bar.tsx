@@ -31,7 +31,11 @@ export const SortBar = ({
 			<Select
 				value={sortBy}
 				onValueChange={(sortBy: SortBy) => {
-					navigate({ to: ".", search: (prev) => ({ ...prev, sortBy }) });
+					navigate({
+						to: ".",
+						replace: true,
+						search: (prev) => ({ ...prev, sortBy }),
+					});
 				}}
 			>
 				<SelectTrigger className="w-[180px] bg-background">
@@ -48,6 +52,7 @@ export const SortBar = ({
 				onClick={() => {
 					navigate({
 						to: ".",
+						replace: true,
 						search: (prev) => ({
 							...prev,
 							order: order === "asc" ? "desc" : "asc",
