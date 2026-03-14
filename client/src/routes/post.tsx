@@ -2,11 +2,11 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { PostCard } from "@/components/post-card";
 import { postQueryOptions } from "@/services/posts";
-import { pathPostSchema } from "@/validators/path.validation";
+import { pathSearchSchema } from "@/validators/path.validation";
 
 export const Route = createFileRoute("/post")({
 	component: Post,
-	validateSearch: pathPostSchema,
+	validateSearch: pathSearchSchema,
 });
 
 function Post() {
