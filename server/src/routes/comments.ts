@@ -30,10 +30,12 @@ const publicRoutes = new Hono<AppEnv>().get(
 		const sortByColumn =
 			sortBy === "points" ? comments.points : comments.createdAt;
 		const sortOrder = order === "desc" ? desc(sortByColumn) : asc(sortByColumn);
-		const [count] = await db
+		const { count } = await db
 			.select({ count: countDistinct(comments.id) })
 			.from(comments)
-			.where(eq(comments.parentCommentId, id));
+			.where(eq(comments.parentCommentId, id))
+			.limit(1)
+			.then(([result]) => result);
 		const result = await db.query.comments.findMany({
 			where: eq(comments.parentCommentId, id),
 			orderBy: sortOrder,
@@ -63,7 +65,7 @@ const publicRoutes = new Hono<AppEnv>().get(
 			message: "Fetched comments",
 			pagination: {
 				page,
-				totalPages: Math.ceil(count.count / limit),
+				totalPages: Math.ceil(count / limit),
 			},
 			data: result satisfies Comment[],
 		});

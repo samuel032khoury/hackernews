@@ -182,15 +182,18 @@ const publicRoutes = new Hono<AppEnv>()
 			const sortByColumn = sortBy === "points" ? posts.points : posts.createdAt;
 			const sortOrder =
 				order === "desc" ? desc(sortByColumn) : asc(sortByColumn);
-			const [count] = await db
+			const { count } = await db
 				.select({ count: countDistinct(posts.id) })
 				.from(posts)
+				.innerJoin(users, eq(posts.userId, users.id))
 				.where(
 					and(
 						author ? eq(posts.userId, author) : undefined,
 						site ? eq(posts.url, site) : undefined,
 					),
-				);
+				)
+				.limit(1)
+				.then(([result]) => result);
 			const postsQuery = db
 				.select({
 					id: posts.id,
@@ -235,7 +238,7 @@ const publicRoutes = new Hono<AppEnv>()
 				message: "Fetched posts",
 				pagination: {
 					page,
-					totalPages: Math.ceil(count.count / limit),
+					totalPages: Math.ceil(count / limit),
 				},
 				data: result satisfies Post[],
 			});
@@ -273,10 +276,12 @@ const publicRoutes = new Hono<AppEnv>()
 			const sortByColumn = sortBy === "points" ? posts.points : posts.createdAt;
 			const sortOrder =
 				order === "desc" ? desc(sortByColumn) : asc(sortByColumn);
-			const [count] = await db
+			const { count } = await db
 				.select({ count: countDistinct(comments.id) })
 				.from(comments)
-				.where(and(eq(comments.postId, id), isNull(comments.parentCommentId)));
+				.innerJoin(users, eq(comments.userId, users.id))
+				.where(and(eq(comments.postId, id), isNull(comments.parentCommentId)))
+				.then(([result]) => result);
 			const result = await db.query.comments.findMany({
 				where: and(eq(comments.postId, id), isNull(comments.parentCommentId)),
 				orderBy: sortOrder,
@@ -331,7 +336,7 @@ const publicRoutes = new Hono<AppEnv>()
 					message: "Fetched comments",
 					pagination: {
 						page,
-						totalPages: Math.ceil(count.count / limit),
+						totalPages: Math.ceil(count / limit),
 					},
 					data: result satisfies Comment[],
 				},
