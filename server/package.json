@@ -29,6 +29,7 @@
 		"shared": "workspace:*"
 	},
 	"devDependencies": {
+		"@types/bun": "^1.3.10",
 		"drizzle-kit": "^0.31.4"
 	}
 }
