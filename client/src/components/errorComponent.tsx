@@ -12,7 +12,7 @@ import { Button } from "./ui/button";
 
 export function ErrorComponent({ error }: { error: Error }) {
 	const router = useRouter();
-	const isDev = process.env.NODE_ENV === "development";
+	const isDev = import.meta.env.DEV;
 
 	const queryClientBoundary = useQueryErrorResetBoundary();
 

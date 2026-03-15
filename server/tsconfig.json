@@ -3,6 +3,7 @@
 	"compilerOptions": {
 		// Environment settings
 		"lib": ["ESNext"],
+		"types": ["bun"],
 		"target": "ESNext",
 		"module": "ESNext",
 		"jsx": "react-jsx",

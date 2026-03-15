@@ -14,15 +14,13 @@ import { HTTPException } from "hono/http-exception";
 import { paginationSchema } from "shared/src/validators/search.validation";
 import z from "zod";
 import { db } from "@/db";
-import {
-	comments,
-	commentUpvotes,
-	posts,
-	postUpvotes,
-	users,
-} from "@/db/schema";
+import { comments, posts, postUpvotes, users } from "@/db/schema";
 import type { AppEnv, ProtectedEnv } from "@/lib/env";
-import { getISOFormatDateQuery, throwValidationError } from "@/lib/utils";
+import {
+	getCommentIsUpvotedQuery,
+	getISOFormatDateQuery,
+	throwValidationError,
+} from "@/lib/utils";
 import requireAuth from "@/middlewares/requireAuth";
 
 const protectedRoutes = new Hono<ProtectedEnv>()
@@ -160,7 +158,7 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 				message: "Comment created successfully",
 				data: {
 					...result,
-					commentUpvotes: [] as { userId: string }[],
+					isUpvoted: false,
 					childComments: [] as Comment[],
 					author: {
 						id: user.id,
@@ -294,13 +292,6 @@ const publicRoutes = new Hono<AppEnv>()
 							username: true,
 						},
 					},
-					commentUpvotes: {
-						columns: {
-							userId: true,
-						},
-						where: eq(commentUpvotes.userId, user?.id ?? ""),
-						limit: 1,
-					},
 					childComments: {
 						limit: includeChildren ? 2 : 0,
 						with: {
@@ -310,24 +301,23 @@ const publicRoutes = new Hono<AppEnv>()
 									username: true,
 								},
 							},
-							commentUpvotes: {
-								columns: {
-									userId: true,
-								},
-								where: eq(commentUpvotes.userId, user?.id ?? ""),
-								limit: 1,
-							},
 						},
 						orderBy: sortOrder,
 						extras: {
 							createdAt: getISOFormatDateQuery(comments.createdAt).as(
 								"created_at",
 							),
+							isUpvoted: getCommentIsUpvotedQuery(comments.id, user?.id).as(
+								"is_upvoted",
+							),
 						},
 					},
 				},
 				extras: {
 					createdAt: getISOFormatDateQuery(comments.createdAt).as("created_at"),
+					isUpvoted: getCommentIsUpvotedQuery(comments.id, user?.id).as(
+						"is_upvoted",
+					),
 				},
 			});
 			return c.json<PaginatedResponse<Comment>>(
