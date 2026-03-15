@@ -19,7 +19,8 @@
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
-		"clean": "rm -rf dist .turbo"
+		"clean": "rm -rf dist .turbo",
+		"predev": "bun run db:generate && bun run db:migrate"
 	},
 	"dependencies": {
 		"@hono/zod-validator": "^0.7.5",

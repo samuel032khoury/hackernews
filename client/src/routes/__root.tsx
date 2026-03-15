@@ -24,7 +24,7 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
 				</main>
 				<footer className="p-4 text-center">
 					<p className="text-muted-foreground text-sm">
-						&copy; 2025 HackerNews
+						&copy; {new Date().getFullYear()} HackerNews
 					</p>
 				</footer>
 			</div>
