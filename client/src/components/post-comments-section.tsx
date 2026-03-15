@@ -3,6 +3,7 @@ import { getRouteApi } from "@tanstack/react-router";
 import { useState } from "react";
 import { commentsInfiniteQueryOptions } from "@/services/comments";
 import { CommentThread } from "./comment-thread";
+import { LoadMoreRepliesButton } from "./load-more-replies-button";
 import { SortBar } from "./sort-bar";
 import { Card, CardContent } from "./ui/card";
 
@@ -11,7 +12,12 @@ const postRouteApi = getRouteApi("/post");
 export const PostCommentsSection = ({ postId }: { postId: string }) => {
 	const { sortBy, order } = postRouteApi.useSearch();
 	const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
-	const { data: comments } = useSuspenseInfiniteQuery(
+	const {
+		data: comments,
+		hasNextPage,
+		fetchNextPage,
+		isFetchingNextPage,
+	} = useSuspenseInfiniteQuery(
 		commentsInfiniteQueryOptions({ id: postId, sortBy, order }),
 	);
 
@@ -37,6 +43,16 @@ export const PostCommentsSection = ({ postId }: { postId: string }) => {
 									isLast={index === page.data.length - 1}
 								/>
 							)),
+						)}
+						{hasNextPage && (
+							<div className="mt-2">
+								<LoadMoreRepliesButton
+									onClick={() => {
+										fetchNextPage();
+									}}
+									isLoading={isFetchingNextPage}
+								/>
+							</div>
 						)}
 					</CardContent>
 				</Card>

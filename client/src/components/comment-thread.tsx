@@ -1,9 +1,7 @@
 import type { Comment } from "@shared/types";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import {
-	ChevronDownIcon,
 	ChevronUpIcon,
-	LoaderIcon,
 	MessageSquare,
 	MinusCircle,
 	PlusCircle,
@@ -12,6 +10,8 @@ import { useState } from "react";
 import { useCurrentUser } from "@/contexts/current-user-context";
 import { cn, relativeTime } from "@/lib/utils";
 import { subCommentsInfiniteQueryOptions } from "@/services/comments";
+import { LoadMoreRepliesButton } from "./load-more-replies-button";
+import { Separator } from "./ui/separator";
 
 type CommentThreadProps = {
 	comment: Comment;
@@ -26,7 +26,7 @@ export function CommentThread({
 	depth = 0,
 	activeReplyId,
 	setActiveReplyId,
-	isLast: _isLast,
+	isLast,
 }: CommentThreadProps) {
 	const { currentUser } = useCurrentUser();
 	const [isCollapsed, setIsCollapsed] = useState(false);
@@ -115,9 +115,7 @@ export function CommentThread({
 				})}
 			{!isCollapsed && (hasNextPage || hasSubComments) && (
 				<div className="mt-2">
-					<button
-						type="button"
-						className="flex items-center space-x-1 text-muted-foreground text-xs hover:text-foreground"
+					<LoadMoreRepliesButton
 						onClick={() => {
 							if (hasSubComments) {
 								queryClient.invalidateQueries({
@@ -127,22 +125,11 @@ export function CommentThread({
 								fetchNextPage();
 							}
 						}}
-						disabled={isFetchingNextPage}
-					>
-						{isFetchingNextPage ? (
-							<>
-								<LoaderIcon size={12} />
-								<span>Loading...</span>
-							</>
-						) : (
-							<>
-								<ChevronDownIcon size={12} />
-								<span>More replies</span>
-							</>
-						)}
-					</button>
+						isLoading={isFetchingNextPage}
+					/>
 				</div>
 			)}
+			{!isLast && <Separator className="my-2" />}
 		</div>
 	);
 }
