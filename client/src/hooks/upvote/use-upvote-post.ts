@@ -94,7 +94,7 @@ const postsListAdapter: CacheAdapter<string, UpvotableItemState> = {
 	},
 };
 
-const useUpvotePost = createOptimisticUpdateMutation({
+export default createOptimisticUpdateMutation({
 	mutationKey: ["upvotePost"],
 	mutationFn: upvotePost,
 	getId: (postId: string) => postId,
@@ -105,5 +105,3 @@ const useUpvotePost = createOptimisticUpdateMutation({
 	}),
 	adapters: [postDetailAdapter, postsListAdapter],
 });
-
-export default useUpvotePost;

@@ -108,7 +108,7 @@ const subCommentsAdapter = createCommentCacheAdapter((vars) =>
 		: null,
 );
 
-const useUpvoteComment = createOptimisticUpdateMutation({
+export default createOptimisticUpdateMutation({
 	mutationKey: ["upvoteComment"],
 	mutationFn: ({ commentId }: UpvoteCommentVariables) =>
 		upvoteComment(commentId),
@@ -120,5 +120,3 @@ const useUpvoteComment = createOptimisticUpdateMutation({
 	}),
 	adapters: [postCommentsAdapter, subCommentsAdapter],
 });
-
-export default useUpvoteComment;
