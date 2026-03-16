@@ -1,6 +1,5 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRef } from "react";
 import { toast } from "sonner";
 
 export type CacheAdapter<TVariables, TState> = {
@@ -12,11 +11,6 @@ export type CacheAdapter<TVariables, TState> = {
 	) => void;
 	cancel: (queryClient: QueryClient, variables: TVariables) => Promise<void>;
 	invalidate: (queryClient: QueryClient, variables: TVariables) => void;
-};
-
-type MutationEntry<TState> = {
-	pendingRequests: number;
-	prevState: TState | null;
 };
 
 type OptimisticUpdateConfig<
@@ -61,9 +55,15 @@ export function createOptimisticUpdateMutation<
 >(config: OptimisticUpdateConfig<TVariables, TState, TResponse>) {
 	const { adapters, getId, getOptimisticUpdate } = config;
 
+	type PendingEntry<TState> = {
+		count: number;
+		prevState: TState | null;
+	};
+
+	const pendingMap = new Map<string, PendingEntry<TState>>();
+
 	return function useOptimisticUpdate() {
 		const queryClient = useQueryClient();
-		const mutationState = useRef(new Map<string, MutationEntry<TState>>());
 
 		return useMutation({
 			mutationKey: config.mutationKey,
@@ -75,40 +75,39 @@ export function createOptimisticUpdateMutation<
 				);
 
 				const id = getId(variables);
-				const tracked = mutationState.current.get(id);
+				const existing = pendingMap.get(id);
 
-				if (tracked) {
-					tracked.pendingRequests += 1;
+				if (existing) {
+					existing.count += 1;
 				} else {
-					mutationState.current.set(id, {
-						pendingRequests: 1,
-						prevState: readState(adapters, queryClient, variables),
-					});
+					const prevState = readState(adapters, queryClient, variables);
+					pendingMap.set(id, { count: 1, prevState });
 				}
 
 				const currentState = readState(adapters, queryClient, variables);
-				if (!currentState) return;
-
-				writeState(
-					adapters,
-					queryClient,
-					variables,
-					getOptimisticUpdate(currentState),
-				);
+				if (currentState) {
+					writeState(
+						adapters,
+						queryClient,
+						variables,
+						getOptimisticUpdate(currentState),
+					);
+				}
 			},
 
 			onSuccess: (response, variables) => {
 				const id = getId(variables);
-				const tracked = mutationState.current.get(id);
+				const tracked = pendingMap.get(id);
 				if (!tracked) return;
 
-				tracked.pendingRequests -= 1;
+				tracked.count -= 1;
+
 				tracked.prevState = response.data;
 
-				if (tracked.pendingRequests !== 0) return;
-
-				writeState(adapters, queryClient, variables, response.data);
-				mutationState.current.delete(id);
+				if (tracked.count === 0) {
+					pendingMap.delete(id);
+					writeState(adapters, queryClient, variables, response.data);
+				}
 			},
 
 			onError: (_error, variables) => {
@@ -118,22 +117,21 @@ export function createOptimisticUpdateMutation<
 				});
 
 				const id = getId(variables);
-				const tracked = mutationState.current.get(id);
+				const tracked = pendingMap.get(id);
 				if (!tracked) return;
 
-				tracked.pendingRequests -= 1;
-				if (tracked.pendingRequests !== 0) return;
-
-				if (tracked.prevState) {
-					writeState(adapters, queryClient, variables, tracked.prevState);
+				tracked.count -= 1;
+				if (tracked.count === 0) {
+					pendingMap.delete(id);
+					if (tracked.prevState) {
+						writeState(adapters, queryClient, variables, tracked.prevState);
+					}
 				}
-
-				mutationState.current.delete(id);
 			},
 
 			onSettled: (_data, _error, variables) => {
 				const id = getId(variables);
-				if (mutationState.current.has(id)) return;
+				if (pendingMap.has(id)) return;
 
 				for (const adapter of adapters) {
 					adapter.invalidate(queryClient, variables);
