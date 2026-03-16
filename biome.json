@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.4.7/schema.json",
 	"vcs": {
 		"enabled": true,
 		"clientKind": "git",
@@ -7,7 +7,7 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!**/*.gen.ts", "!**/index.css"]
+		"includes": ["**", "!**/*.gen.ts", "!**/index.css", "!**/components/ui"]
 	},
 	"formatter": {
 		"enabled": true
@@ -31,6 +31,12 @@
 						"attributes": ["className"],
 						"functions": ["cn", "clsx", "twMerge"]
 					}
+				}
+			},
+			"correctness": {
+				"noUnusedImports": {
+					"level": "warn",
+					"fix": "safe"
 				}
 			}
 		}
