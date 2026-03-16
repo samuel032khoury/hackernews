@@ -9,6 +9,17 @@ import { homeSearchSchema } from "@/validators/search.validation";
 export const Route = createFileRoute("/")({
 	component: Index,
 	validateSearch: homeSearchSchema,
+	loaderDeps: ({ search }) => ({
+		sortBy: search.sortBy,
+		order: search.order,
+		author: search.author,
+		site: search.site,
+	}),
+	loader: ({ context, deps: { sortBy, order, author, site } }) => {
+		context.queryClient.ensureInfiniteQueryData(
+			postsInfiniteQueryOptions({ sortBy, order, author, site }),
+		);
+	},
 });
 
 function Index() {
