@@ -1,10 +1,15 @@
-import type { ApiResponse, PaginatedResponse, Post } from "@shared/types";
+import type {
+	ApiResponse,
+	PaginatedResponse,
+	Post,
+	UpvotableItemState,
+} from "@shared/types";
 import type { InfiniteData } from "@tanstack/react-query";
 import { produce } from "immer";
 import {
 	type CacheAdapter,
-	createOptimisticUpvoteMutation,
-} from "@/hooks/upvote/use-optimistic-upvote";
+	createOptimisticUpdateMutation,
+} from "@/hooks/use-optimistic-update";
 import { upvotePost } from "@/services/posts";
 
 type SuccessOf<T> = Extract<T, { success: true }>;
@@ -20,7 +25,7 @@ const findPostInListCache = (data: PostsListCacheData, postId: string) => {
 	return null;
 };
 
-const postDetailAdapter: CacheAdapter<string> = {
+const postDetailAdapter: CacheAdapter<string, UpvotableItemState> = {
 	read(queryClient, postId) {
 		const data = queryClient.getQueryData<PostDetailsCacheData>([
 			"post",
@@ -48,7 +53,7 @@ const postDetailAdapter: CacheAdapter<string> = {
 	},
 };
 
-const postsListAdapter: CacheAdapter<string> = {
+const postsListAdapter: CacheAdapter<string, UpvotableItemState> = {
 	read(queryClient, postId) {
 		const entries = queryClient.getQueriesData<PostsListCacheData>({
 			queryKey: ["posts"],
@@ -89,10 +94,15 @@ const postsListAdapter: CacheAdapter<string> = {
 	},
 };
 
-const useUpvotePost = createOptimisticUpvoteMutation({
-	mutationKey: ["upvote"],
+const useUpvotePost = createOptimisticUpdateMutation({
+	mutationKey: ["upvotePost"],
 	mutationFn: upvotePost,
 	getId: (postId: string) => postId,
+	getOptimisticUpdate: (currentState: UpvotableItemState) => ({
+		...currentState,
+		isUpvoted: !currentState.isUpvoted,
+		points: currentState.points + (currentState.isUpvoted ? -1 : 1),
+	}),
 	adapters: [postDetailAdapter, postsListAdapter],
 });
 

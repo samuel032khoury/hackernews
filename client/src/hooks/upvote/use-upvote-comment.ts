@@ -1,10 +1,14 @@
-import type { Comment, PaginatedResponse } from "@shared/types";
+import type {
+	Comment,
+	PaginatedResponse,
+	UpvotableItemState,
+} from "@shared/types";
 import type { InfiniteData } from "@tanstack/react-query";
 import { produce } from "immer";
 import {
 	type CacheAdapter,
-	createOptimisticUpvoteMutation,
-} from "@/hooks/upvote/use-optimistic-upvote";
+	createOptimisticUpdateMutation,
+} from "@/hooks/use-optimistic-update";
 import { upvoteComment } from "@/services/comments";
 
 type SuccessOf<T> = Extract<T, { success: true }>;
@@ -48,7 +52,7 @@ const findCommentInPages = (
 
 const createCommentCacheAdapter = (
 	getQueryKey: (variables: UpvoteCommentVariables) => CommentQueryKey | null,
-): CacheAdapter<UpvoteCommentVariables> => ({
+): CacheAdapter<UpvoteCommentVariables, UpvotableItemState> => ({
 	read(queryClient, variables) {
 		const queryKey = getQueryKey(variables);
 		if (!queryKey) return null;
@@ -104,11 +108,16 @@ const subCommentsAdapter = createCommentCacheAdapter((vars) =>
 		: null,
 );
 
-const useUpvoteComment = createOptimisticUpvoteMutation({
+const useUpvoteComment = createOptimisticUpdateMutation({
 	mutationKey: ["upvoteComment"],
 	mutationFn: ({ commentId }: UpvoteCommentVariables) =>
 		upvoteComment(commentId),
-	getId: (variables: UpvoteCommentVariables) => variables.commentId,
+	getId: (variables: UpvoteCommentVariables) => variables.commentId.toString(),
+	getOptimisticUpdate: (currentState: UpvotableItemState) => ({
+		...currentState,
+		isUpvoted: !currentState.isUpvoted,
+		points: currentState.points + (currentState.isUpvoted ? -1 : 1),
+	}),
 	adapters: [postCommentsAdapter, subCommentsAdapter],
 });
 

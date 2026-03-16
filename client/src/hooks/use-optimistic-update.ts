@@ -1,43 +1,41 @@
-import type { UpvotableItemState } from "@shared/types";
 import type { QueryClient } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRef } from "react";
 import { toast } from "sonner";
 
-export type CacheAdapter<TVariables> = {
-	read: (
-		queryClient: QueryClient,
-		variables: TVariables,
-	) => UpvotableItemState | null;
+export type CacheAdapter<TVariables, TState> = {
+	read: (queryClient: QueryClient, variables: TVariables) => TState | null;
 	write: (
 		queryClient: QueryClient,
 		variables: TVariables,
-		update: UpvotableItemState,
+		update: TState,
 	) => void;
 	cancel: (queryClient: QueryClient, variables: TVariables) => Promise<void>;
 	invalidate: (queryClient: QueryClient, variables: TVariables) => void;
 };
 
-type MutationEntry = {
+type MutationEntry<TState> = {
 	pendingRequests: number;
-	prevState: UpvotableItemState | null;
+	prevState: TState | null;
 };
 
-type OptimisticUpvoteConfig<
+type OptimisticUpdateConfig<
 	TVariables,
-	TResponse extends { data: UpvotableItemState },
+	TState,
+	TResponse extends { data: TState },
 > = {
 	mutationKey: string[];
 	mutationFn: (variables: TVariables) => Promise<TResponse>;
-	getId: (variables: TVariables) => string | number;
-	adapters: CacheAdapter<TVariables>[];
+	getId: (variables: TVariables) => string;
+	getOptimisticUpdate: (currentState: TState) => TState;
+	adapters: CacheAdapter<TVariables, TState>[];
 };
 
-function readState<TVariables>(
-	adapters: CacheAdapter<TVariables>[],
+function readState<TVariables, TState>(
+	adapters: CacheAdapter<TVariables, TState>[],
 	queryClient: QueryClient,
 	variables: TVariables,
-): UpvotableItemState | null {
+): TState | null {
 	for (const adapter of adapters) {
 		const state = adapter.read(queryClient, variables);
 		if (state) return state;
@@ -45,26 +43,27 @@ function readState<TVariables>(
 	return null;
 }
 
-function writeState<TVariables>(
-	adapters: CacheAdapter<TVariables>[],
+function writeState<TVariables, TState>(
+	adapters: CacheAdapter<TVariables, TState>[],
 	queryClient: QueryClient,
 	variables: TVariables,
-	update: UpvotableItemState,
+	update: TState,
 ) {
 	for (const adapter of adapters) {
 		adapter.write(queryClient, variables, update);
 	}
 }
 
-export function createOptimisticUpvoteMutation<
+export function createOptimisticUpdateMutation<
 	TVariables,
-	TResponse extends { data: UpvotableItemState },
->(config: OptimisticUpvoteConfig<TVariables, TResponse>) {
-	const { adapters, getId } = config;
+	TState,
+	TResponse extends { data: TState },
+>(config: OptimisticUpdateConfig<TVariables, TState, TResponse>) {
+	const { adapters, getId, getOptimisticUpdate } = config;
 
-	return function useOptimisticUpvote() {
+	return function useOptimisticUpdate() {
 		const queryClient = useQueryClient();
-		const mutationState = useRef(new Map<string | number, MutationEntry>());
+		const mutationState = useRef(new Map<string, MutationEntry<TState>>());
 
 		return useMutation({
 			mutationKey: config.mutationKey,
@@ -90,10 +89,12 @@ export function createOptimisticUpvoteMutation<
 				const currentState = readState(adapters, queryClient, variables);
 				if (!currentState) return;
 
-				writeState(adapters, queryClient, variables, {
-					isUpvoted: !currentState.isUpvoted,
-					points: currentState.points + (currentState.isUpvoted ? -1 : 1),
-				});
+				writeState(
+					adapters,
+					queryClient,
+					variables,
+					getOptimisticUpdate(currentState),
+				);
 			},
 
 			onSuccess: (response, variables) => {
@@ -112,7 +113,7 @@ export function createOptimisticUpvoteMutation<
 
 			onError: (_error, variables) => {
 				toast.error("An error occurred", {
-					description: "Failed to update upvote. Please try again.",
+					description: "Failed to process update. Please try again.",
 					icon: "⚠️",
 				});
 
