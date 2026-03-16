@@ -21,10 +21,6 @@ type UpvoteCommentVariables = {
 	postId: string;
 };
 
-type CommentQueryKey =
-	| readonly ["comments", "post", string]
-	| readonly ["comments", "comment", string];
-
 const findCommentInPages = (data: CommentsCacheData, commentId: string) => {
 	for (const page of data.pages) {
 		const comment = page.data.find((c) => c.id.toString() === commentId);
@@ -33,63 +29,53 @@ const findCommentInPages = (data: CommentsCacheData, commentId: string) => {
 	return null;
 };
 
-const createCommentCacheAdapter = (
-	getQueryKey: (variables: UpvoteCommentVariables) => CommentQueryKey | null,
-): CacheAdapter<UpvoteCommentVariables, UpvotableItemState> => ({
-	read(queryClient, variables) {
-		const queryKey = getQueryKey(variables);
-		if (!queryKey) return null;
+const getCommentQueryKey = (vars: UpvoteCommentVariables) =>
+	vars.parentCommentId === null
+		? ["comments", "post", vars.postId]
+		: ["comments", "comment", vars.parentCommentId];
 
-		const entries = queryClient.getQueriesData<CommentsCacheData>({ queryKey });
+const commentsCacheAdapter: CacheAdapter<
+	UpvoteCommentVariables,
+	UpvotableItemState
+> = {
+	read(queryClient, variables) {
+		const entries = queryClient.getQueriesData<CommentsCacheData>({
+			queryKey: getCommentQueryKey(variables),
+		});
 		for (const [, cacheData] of entries) {
 			if (!cacheData) continue;
 			const comment = findCommentInPages(cacheData, variables.commentId);
-			if (comment) {
+			if (comment)
 				return { isUpvoted: comment.isUpvoted, points: comment.points };
-			}
 		}
 		return null;
 	},
-
 	write(queryClient, variables, update) {
-		const queryKey = getQueryKey(variables);
-		if (!queryKey) return;
-
-		queryClient.setQueriesData<CommentsCacheData>({ queryKey }, (existing) => {
-			if (!existing) return existing;
-			return produce(existing, (draft) => {
-				const comment = findCommentInPages(draft, variables.commentId);
-				if (!comment) return;
-				comment.isUpvoted = update.isUpvoted;
-				comment.points = update.points;
-			});
+		queryClient.setQueriesData<CommentsCacheData>(
+			{ queryKey: getCommentQueryKey(variables) },
+			(existing) => {
+				if (!existing) return existing;
+				return produce(existing, (draft) => {
+					const comment = findCommentInPages(draft, variables.commentId);
+					if (!comment) return;
+					comment.isUpvoted = update.isUpvoted;
+					comment.points = update.points;
+				});
+			},
+		);
+	},
+	async cancel(queryClient, variables) {
+		await queryClient.cancelQueries({
+			queryKey: getCommentQueryKey(variables),
 		});
 	},
-
-	async cancel(queryClient, variables) {
-		const queryKey = getQueryKey(variables);
-		if (!queryKey) return;
-		await queryClient.cancelQueries({ queryKey });
-	},
-
 	invalidate(queryClient, variables) {
-		const queryKey = getQueryKey(variables);
-		if (!queryKey) return;
-		queryClient.invalidateQueries({ queryKey, refetchType: "none" });
+		queryClient.invalidateQueries({
+			queryKey: getCommentQueryKey(variables),
+			refetchType: "none",
+		});
 	},
-});
-
-const postCommentsAdapter = createCommentCacheAdapter((vars) => [
-	"comments",
-	"post",
-	vars.postId,
-]);
-
-const subCommentsAdapter = createCommentCacheAdapter((vars) =>
-	vars.parentCommentId !== null
-		? ["comments", "comment", vars.parentCommentId]
-		: null,
-);
+};
 
 export default createOptimisticUpdateMutation({
 	mutationKey: ["upvoteComment"],
@@ -101,5 +87,5 @@ export default createOptimisticUpdateMutation({
 		isUpvoted: !currentState.isUpvoted,
 		points: currentState.points + (currentState.isUpvoted ? -1 : 1),
 	}),
-	adapters: [postCommentsAdapter, subCommentsAdapter],
+	adapters: [commentsCacheAdapter],
 });
