@@ -22,14 +22,14 @@ export const PostCommentsSection = ({ postId }: { postId: string }) => {
 	);
 
 	return (
-		<>
-			<div className="mt-8 mb-4">
-				<h2 className="mb-2 font-bold text-foreground text-lg">Comments</h2>
-				{comments.pages[0].data.length > 0 && (
-					<SortBar sortBy={sortBy} order={order} />
-				)}
-			</div>
-			{comments.pages[0].data.length > 0 && (
+		comments.pages[0].data.length > 0 && (
+			<>
+				<div className="mt-8 mb-4">
+					<h2 className="mb-2 font-bold text-foreground text-lg">Comments</h2>
+					{comments.pages[0].data.length > 0 && (
+						<SortBar sortBy={sortBy} order={order} />
+					)}
+				</div>
 				<Card>
 					<CardContent className="px-4">
 						{comments.pages.map((page) =>
@@ -56,7 +56,7 @@ export const PostCommentsSection = ({ postId }: { postId: string }) => {
 						)}
 					</CardContent>
 				</Card>
-			)}
-		</>
+			</>
+		)
 	);
 };

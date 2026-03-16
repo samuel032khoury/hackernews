@@ -1,5 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { createRouter, RouterProvider } from "@tanstack/react-router";
+import {
+	createRouter,
+	RouterProvider,
+	stringifySearchWith,
+} from "@tanstack/react-router";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
@@ -21,6 +25,7 @@ const router = createRouter({
 	defaultNotFoundComponent: NotFoundComponent,
 	defaultErrorComponent: ErrorComponent,
 	defaultPendingComponent: LoadingComponent,
+	stringifySearch: stringifySearchWith(JSON.stringify),
 });
 
 // Register the router instance for type safety

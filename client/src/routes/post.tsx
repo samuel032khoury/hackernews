@@ -15,12 +15,10 @@ export const Route = createFileRoute("/post")({
 		order: search.order,
 	}),
 	loader: async ({ context, deps: { id, sortBy, order } }) => {
-		await Promise.all([
-			context.queryClient.ensureQueryData(postQueryOptions(id)),
-			context.queryClient.ensureInfiniteQueryData(
-				commentsInfiniteQueryOptions({ id: id, sortBy, order }),
-			),
-		]);
+		await context.queryClient.ensureQueryData(postQueryOptions(id));
+		await context.queryClient.ensureInfiniteQueryData(
+			commentsInfiniteQueryOptions({ id: id, sortBy, order }),
+		);
 	},
 });
 
