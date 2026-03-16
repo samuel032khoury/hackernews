@@ -27,12 +27,12 @@ const findPostInListCache = (data: PostsListCacheData, postId: string) => {
 
 const postDetailAdapter: CacheAdapter<string, UpvotableItemState> = {
 	read(queryClient, postId) {
-		const data = queryClient.getQueryData<PostDetailsCacheData>([
+		const cached = queryClient.getQueryData<PostDetailsCacheData>([
 			"post",
 			postId,
 		]);
-		if (!data?.data) return null;
-		return { isUpvoted: data.data.isUpvoted, points: data.data.points };
+		if (!cached) return null;
+		return { isUpvoted: cached.data.isUpvoted, points: cached.data.points };
 	},
 
 	write(queryClient, postId, update) {

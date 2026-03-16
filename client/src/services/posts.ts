@@ -37,6 +37,7 @@ export const postQueryOptions = (id: string) =>
 		staleTime: Infinity,
 		retry: false,
 		throwOnError: true,
+		select: (data) => data.data,
 	});
 
 const getAllPosts = async ({

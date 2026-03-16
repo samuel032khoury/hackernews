@@ -15,7 +15,7 @@ function Post() {
 	const { data } = useSuspenseQuery(postQueryOptions(id));
 	return (
 		<div className="mx-auto max-w-3xl">
-			{data && <PostCard post={data.data} />}
+			{data && <PostCard post={data} />}
 			<PostCommentsSection postId={id} />
 		</div>
 	);
