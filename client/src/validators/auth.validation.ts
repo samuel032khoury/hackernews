@@ -35,3 +35,7 @@ export const logInSchema = z.object({
 	username: z.string().nonempty({ error: "Username is required" }),
 	password: z.string().nonempty({ error: "Password is required" }),
 });
+
+export const pathRedirectSchema = z.object({
+	redirect: z.string().catch("/").default("/"),
+});

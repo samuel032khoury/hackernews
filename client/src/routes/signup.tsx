@@ -23,8 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signUp } from "@/services/auth";
 import { currentUserQueryOptions } from "@/services/users";
-import { signUpSchema } from "@/validators/auth.validation";
-import { pathRedirectSchema } from "@/validators/path.validation";
+import { pathRedirectSchema, signUpSchema } from "@/validators/auth.validation";
 
 export const Route = createFileRoute("/signup")({
 	component: SignUp,
@@ -176,7 +175,7 @@ function SignUp() {
 											/>
 											<button
 												type="button"
-												className="-translate-y-1/2 absolute top-1/2 right-3 text-muted-foreground hover:text-foreground"
+												className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
 												onClick={() => setShowPassword(!showPassword)}
 												tabIndex={-1}
 											>
@@ -207,7 +206,7 @@ function SignUp() {
 											/>
 											<button
 												type="button"
-												className="-translate-y-1/2 absolute top-1/2 right-3 text-muted-foreground hover:text-foreground"
+												className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
 												onClick={() => setShowPassword(!showPassword)}
 												tabIndex={-1}
 											>

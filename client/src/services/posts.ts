@@ -1,4 +1,3 @@
-import type { paginationSchema } from "@shared/validators/search.validation";
 import {
 	infiniteQueryOptions,
 	keepPreviousData,
@@ -7,18 +6,18 @@ import {
 import { notFound } from "@tanstack/react-router";
 import type z from "zod";
 import { api } from "@/lib/api";
+import type { homeSearchSchema } from "@/validators/search.validation";
 
 export const postsInfiniteQueryOptions = ({
 	sortBy,
-	limit,
 	order,
 	author,
 	site,
-}: z.infer<typeof paginationSchema>) =>
+}: z.infer<typeof homeSearchSchema>) =>
 	infiniteQueryOptions({
 		queryKey: ["posts", sortBy, order, author, site],
 		queryFn: ({ pageParam: page }) =>
-			getAllPosts({ page, limit, sortBy, order, author, site }),
+			getAllPosts(page, { sortBy, order, author, site }),
 		placeholderData: keepPreviousData,
 		initialPageParam: 1,
 		staleTime: Infinity,
@@ -40,13 +39,10 @@ export const postQueryOptions = (id: string) =>
 		select: (data) => data.data,
 	});
 
-const getAllPosts = async ({
-	page = 1,
-	sortBy,
-	order,
-	author,
-	site,
-}: z.infer<typeof paginationSchema>) => {
+const getAllPosts = async (
+	page: number,
+	{ sortBy, order, author, site }: z.infer<typeof homeSearchSchema>,
+) => {
 	const res = await api.posts.$get({
 		query: {
 			page: page.toString(),

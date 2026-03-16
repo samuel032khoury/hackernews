@@ -20,8 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { signIn } from "@/services/auth";
 import { currentUserQueryOptions } from "@/services/users";
-import { logInSchema } from "@/validators/auth.validation";
-import { pathRedirectSchema } from "@/validators/path.validation";
+import { logInSchema, pathRedirectSchema } from "@/validators/auth.validation";
 
 export const Route = createFileRoute("/login")({
 	component: Login,

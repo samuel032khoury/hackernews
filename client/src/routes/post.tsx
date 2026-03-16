@@ -3,11 +3,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { PostCard } from "@/components/post-card";
 import { PostCommentsSection } from "@/components/post-comments-section";
 import { postQueryOptions } from "@/services/posts";
-import { pathSearchSchema } from "@/validators/path.validation";
+import { postSearchSchema } from "@/validators/search.validation";
 
 export const Route = createFileRoute("/post")({
 	component: Post,
-	validateSearch: pathSearchSchema,
+	validateSearch: postSearchSchema,
 });
 
 function Post() {

@@ -1,14 +1,16 @@
 import {
 	orderSchema,
+	paginationSchema,
 	sortBySchema,
 } from "@shared/validators/search.validation";
 import { z } from "zod";
 
-export const pathRedirectSchema = z.object({
-	redirect: z.string().catch("/").default("/"),
+export const homeSearchSchema = paginationSchema.omit({
+	page: true,
+	limit: true,
 });
 
-export const pathSearchSchema = z.object({
+export const postSearchSchema = z.object({
 	id: z.coerce.string().catch("0").default("0"),
 	sortBy: sortBySchema.catch("points").default("points"),
 	order: orderSchema.catch("desc").default("desc"),

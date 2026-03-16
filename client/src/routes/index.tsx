@@ -1,21 +1,21 @@
-import { paginationSchema } from "@shared/validators/search.validation";
 import { useSuspenseInfiniteQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { PostCard } from "@/components/post-card";
 import { SortBar } from "@/components/sort-bar";
 import { Button } from "@/components/ui/button";
 import { postsInfiniteQueryOptions } from "@/services/posts";
+import { homeSearchSchema } from "@/validators/search.validation";
 
 export const Route = createFileRoute("/")({
 	component: Index,
-	validateSearch: paginationSchema,
+	validateSearch: homeSearchSchema,
 });
 
 function Index() {
-	const { page, limit, sortBy, order, author, site } = Route.useSearch();
+	const { sortBy, order, author, site } = Route.useSearch();
 	const { data, isFetchingNextPage, isFetching, fetchNextPage, hasNextPage } =
 		useSuspenseInfiniteQuery(
-			postsInfiniteQueryOptions({ page, limit, sortBy, order, author, site }),
+			postsInfiniteQueryOptions({ sortBy, order, author, site }),
 		);
 	return (
 		<div className="mx-auto max-w-6xl p-4">
