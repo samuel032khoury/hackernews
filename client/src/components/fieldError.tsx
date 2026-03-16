@@ -1,6 +1,9 @@
 import type { AnyFieldApi } from "@tanstack/react-form";
 
-export function FieldError({ field }: { field: AnyFieldApi }) {
+export function FieldError({
+	field,
+	showOnChange = false,
+}: { field: AnyFieldApi; showOnChange?: boolean }) {
 	const errors = field.state.meta.errors;
 	const submitError = field.state.meta.errorMap.onSubmit;
 	if (submitError) {
@@ -10,11 +13,10 @@ export function FieldError({ field }: { field: AnyFieldApi }) {
 			</p>
 		);
 	}
-	if (
-		!field.state.meta.isPristine &&
-		field.state.meta.isBlurred &&
-		errors.length > 0
-	) {
+	const shouldShow = showOnChange
+		? !field.state.meta.isPristine
+		: !field.state.meta.isPristine && field.state.meta.isBlurred;
+	if (shouldShow && errors.length > 0) {
 		return (
 			<p className="font-light text-[0.7rem] text-destructive">
 				{errors.map((err) => err.message).join(", ")}

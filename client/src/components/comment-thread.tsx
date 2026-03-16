@@ -11,6 +11,7 @@ import { useCurrentUser } from "@/contexts/current-user-context";
 import { useUpvoteComment } from "@/hooks/upvote";
 import { cn, relativeTime } from "@/lib/utils";
 import { subCommentsInfiniteQueryOptions } from "@/services/comments";
+import { CommentForm } from "./comment-form";
 import { LoadMoreRepliesButton } from "./load-more-replies-button";
 import { Separator } from "./ui/separator";
 
@@ -98,10 +99,12 @@ export function CommentThread({
 							)}
 						</div>
 						{isReplying && (
-							<div className="mt-2 flex flex-col items-baseline space-y-2">
-								<button type="button" onClick={() => setActiveReplyId(null)}>
-									<span>------Cancel------</span>
-								</button>
+							<div className="mt-2">
+								<CommentForm
+									postId={comment.postId.toString()}
+									parentCommentId={comment.id.toString()}
+									onCompletion={() => setActiveReplyId(null)}
+								/>
 							</div>
 						)}
 					</>
