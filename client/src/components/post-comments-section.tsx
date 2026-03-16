@@ -11,7 +11,7 @@ const postRouteApi = getRouteApi("/post");
 
 export const PostCommentsSection = ({ postId }: { postId: string }) => {
 	const { sortBy, order } = postRouteApi.useSearch();
-	const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
+	const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
 	const {
 		data: comments,
 		hasNextPage,

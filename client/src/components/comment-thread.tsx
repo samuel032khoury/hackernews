@@ -17,8 +17,8 @@ import { Separator } from "./ui/separator";
 type CommentThreadProps = {
 	comment: Comment;
 	depth: number;
-	activeReplyId: number | null;
-	setActiveReplyId: React.Dispatch<React.SetStateAction<number | null>>;
+	activeReplyId: string | null;
+	setActiveReplyId: React.Dispatch<React.SetStateAction<string | null>>;
 	isLast: boolean;
 };
 
@@ -40,7 +40,7 @@ export function CommentThread({
 		isFetchingNextPage,
 	} = useInfiniteQuery(subCommentsInfiniteQueryOptions(comment));
 
-	const isReplying = activeReplyId === comment.id;
+	const isReplying = activeReplyId === comment.id.toString();
 	const hasSubComments =
 		commentsData?.pages[0]?.data.length === 0 && comment.commentCount > 0;
 
@@ -58,8 +58,8 @@ export function CommentThread({
 						)}
 						onClick={() =>
 							upvote({
-								commentId: comment.id,
-								parentCommentId: comment.parentCommentId,
+								commentId: comment.id.toString(),
+								parentCommentId: comment.parentCommentId?.toString() ?? null,
 								postId: comment.postId.toString(),
 							})
 						}
@@ -90,7 +90,7 @@ export function CommentThread({
 								<button
 									type="button"
 									className="flex items-center space-x-1 hover:text-foreground"
-									onClick={() => setActiveReplyId(comment.id)}
+									onClick={() => setActiveReplyId(comment.id.toString())}
 								>
 									<MessageSquare size={16} />
 									<span>Reply</span>
@@ -113,7 +113,7 @@ export function CommentThread({
 					const isLastPage = index === commentsData.pages.length - 1;
 					return page.data.map((subComment, index) => (
 						<CommentThread
-							key={subComment.id}
+							key={subComment.id.toString()}
 							comment={subComment}
 							depth={depth + 1}
 							activeReplyId={activeReplyId}
@@ -128,7 +128,7 @@ export function CommentThread({
 						onClick={() => {
 							if (hasSubComments) {
 								queryClient.invalidateQueries({
-									queryKey: ["comments", "comment", comment.id],
+									queryKey: ["comments", "comment", comment.id.toString()],
 								});
 							} else {
 								fetchNextPage();

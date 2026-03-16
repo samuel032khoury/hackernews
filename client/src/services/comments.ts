@@ -54,8 +54,9 @@ const getComments = async (
 };
 export const subCommentsInfiniteQueryOptions = (comment: Comment) =>
 	infiniteQueryOptions({
-		queryKey: ["comments", "comment", comment.id],
-		queryFn: async ({ pageParam }) => getSubComments(comment.id, pageParam),
+		queryKey: ["comments", "comment", comment.id.toString()],
+		queryFn: async ({ pageParam }) =>
+			getSubComments(comment.id.toString(), pageParam),
 		initialPageParam: 1,
 		staleTime: Infinity,
 		initialData: {
@@ -81,7 +82,7 @@ export const subCommentsInfiniteQueryOptions = (comment: Comment) =>
 	});
 
 const getSubComments = async (
-	commentId: number,
+	commentId: string,
 	page: number = 1,
 	limit: number = 2,
 ) => {
@@ -99,9 +100,9 @@ const getSubComments = async (
 	return data;
 };
 
-export async function upvoteComment(commentId: number) {
+export async function upvoteComment(commentId: string) {
 	const res = await api.comments[":id"].upvote.$post({
-		param: { id: commentId.toString() },
+		param: { id: commentId },
 	});
 	const data = await res.json();
 	if (!data.success) {

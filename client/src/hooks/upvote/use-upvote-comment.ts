@@ -16,22 +16,19 @@ type CommentsPageSuccess = SuccessOf<PaginatedResponse<Comment>>;
 type CommentsCacheData = InfiniteData<CommentsPageSuccess, number>;
 
 type UpvoteCommentVariables = {
-	commentId: number;
-	parentCommentId: number | null;
+	commentId: string;
+	parentCommentId: string | null;
 	postId: string;
 };
 
 type CommentQueryKey =
 	| readonly ["comments", "post", string]
-	| readonly ["comments", "comment", number];
+	| readonly ["comments", "comment", string];
 
-const findCommentInPages = (
-	cacheData: CommentsCacheData,
-	commentId: number,
-): Comment | null => {
-	for (const page of cacheData.pages) {
-		const match = page.data.find((comment) => comment.id === commentId);
-		if (match) return match;
+const findCommentInPages = (data: CommentsCacheData, commentId: string) => {
+	for (const page of data.pages) {
+		const comment = page.data.find((c) => c.id.toString() === commentId);
+		if (comment) return comment;
 	}
 	return null;
 };
@@ -98,7 +95,7 @@ export default createOptimisticUpdateMutation({
 	mutationKey: ["upvoteComment"],
 	mutationFn: ({ commentId }: UpvoteCommentVariables) =>
 		upvoteComment(commentId),
-	getId: (variables: UpvoteCommentVariables) => variables.commentId.toString(),
+	getId: (variables: UpvoteCommentVariables) => variables.commentId,
 	getOptimisticUpdate: (currentState: UpvotableItemState) => ({
 		...currentState,
 		isUpvoted: !currentState.isUpvoted,
