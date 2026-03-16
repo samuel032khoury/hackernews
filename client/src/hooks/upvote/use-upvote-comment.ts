@@ -25,26 +25,12 @@ type CommentQueryKey =
 	| readonly ["comments", "post", string]
 	| readonly ["comments", "comment", number];
 
-const findCommentInTree = (
-	comments: Comment[],
-	commentId: number,
-): Comment | null => {
-	for (const node of comments) {
-		if (node.id === commentId) return node;
-		if (node.childComments?.length) {
-			const match = findCommentInTree(node.childComments, commentId);
-			if (match) return match;
-		}
-	}
-	return null;
-};
-
 const findCommentInPages = (
 	cacheData: CommentsCacheData,
 	commentId: number,
 ): Comment | null => {
 	for (const page of cacheData.pages) {
-		const match = findCommentInTree(page.data, commentId);
+		const match = page.data.find((comment) => comment.id === commentId);
 		if (match) return match;
 	}
 	return null;

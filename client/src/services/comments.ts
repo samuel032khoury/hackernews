@@ -1,6 +1,6 @@
 import type { Comment } from "@shared/types";
 import type { paginationSchema } from "@shared/validators/search.validation";
-import { infiniteQueryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions, keepPreviousData } from "@tanstack/react-query";
 import type z from "zod";
 import { api } from "@/lib/api";
 import type { pathSearchSchema } from "@/validators/path.validation";
@@ -19,6 +19,7 @@ export const commentsInfiniteQueryOptions = ({
 				sortBy,
 				order,
 			}),
+		placeholderData: keepPreviousData,
 		initialPageParam: 1,
 		staleTime: Infinity,
 		retry: false,

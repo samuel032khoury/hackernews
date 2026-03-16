@@ -113,7 +113,7 @@ export function createOptimisticUpdateMutation<
 
 			onError: (_error, variables) => {
 				toast.error("An error occurred", {
-					description: "Failed to process update. Please try again.",
+					description: "Something went wrong. Please try again.",
 					icon: "⚠️",
 				});
 
