@@ -4,7 +4,7 @@ import type {
 	Comment,
 	PaginatedResponse,
 	Post,
-	PostState,
+	UpvotableItemState,
 } from "@shared/types";
 import { createCommentSchema } from "@shared/validators/comments.validation";
 import { createPostSchema } from "@shared/validators/posts.validation";
@@ -102,7 +102,7 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 				return { points: updated.points, isUpvoted: isNewUpvote };
 			});
 
-			return c.json<ApiResponse<PostState>>({
+			return c.json<ApiResponse<UpvotableItemState>>({
 				success: true,
 				message: "Post updated successfully",
 				data: points,

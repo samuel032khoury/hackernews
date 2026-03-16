@@ -67,7 +67,7 @@ export interface Post {
 	isUpvoted: boolean;
 }
 
-export interface PostState {
+export interface UpvotableItemState {
 	isUpvoted: boolean;
 	points: number;
 }

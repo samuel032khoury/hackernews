@@ -1,0 +1,99 @@
+import type { ApiResponse, PaginatedResponse, Post } from "@shared/types";
+import type { InfiniteData } from "@tanstack/react-query";
+import { produce } from "immer";
+import {
+	type CacheAdapter,
+	createOptimisticUpvoteMutation,
+} from "@/hooks/upvote/use-optimistic-upvote";
+import { upvotePost } from "@/services/posts";
+
+type SuccessOf<T> = Extract<T, { success: true }>;
+type PostsPageSuccess = SuccessOf<PaginatedResponse<Post>>;
+type PostsListCacheData = InfiniteData<PostsPageSuccess, number>;
+type PostDetailsCacheData = SuccessOf<ApiResponse<Post>>;
+
+const findPostInListCache = (data: PostsListCacheData, postId: string) => {
+	for (const page of data.pages) {
+		const post = page.data.find((p) => p.id.toString() === postId);
+		if (post) return post;
+	}
+	return null;
+};
+
+const postDetailAdapter: CacheAdapter<string> = {
+	read(queryClient, postId) {
+		const data = queryClient.getQueryData<PostDetailsCacheData>([
+			"post",
+			postId,
+		]);
+		if (!data?.data) return null;
+		return { isUpvoted: data.data.isUpvoted, points: data.data.points };
+	},
+
+	write(queryClient, postId, update) {
+		queryClient.setQueryData<PostDetailsCacheData>(["post", postId], (old) =>
+			old ? { ...old, data: { ...old.data, ...update } } : old,
+		);
+	},
+
+	async cancel(queryClient, postId) {
+		await queryClient.cancelQueries({ queryKey: ["post", postId] });
+	},
+
+	invalidate(queryClient, postId) {
+		queryClient.invalidateQueries({
+			queryKey: ["post", postId],
+			refetchType: "none",
+		});
+	},
+};
+
+const postsListAdapter: CacheAdapter<string> = {
+	read(queryClient, postId) {
+		const entries = queryClient.getQueriesData<PostsListCacheData>({
+			queryKey: ["posts"],
+		});
+		for (const [, data] of entries) {
+			if (!data) continue;
+			const post = findPostInListCache(data, postId);
+			if (post) return { isUpvoted: post.isUpvoted, points: post.points };
+		}
+		return null;
+	},
+
+	write(queryClient, postId, update) {
+		queryClient.setQueriesData<PostsListCacheData>(
+			{ queryKey: ["posts"] },
+			(old) => {
+				if (!old) return old;
+				return produce(old, (draft) => {
+					const post = findPostInListCache(draft, postId);
+					if (post) {
+						post.isUpvoted = update.isUpvoted;
+						post.points = update.points;
+					}
+				});
+			},
+		);
+	},
+
+	async cancel(queryClient) {
+		await queryClient.cancelQueries({ queryKey: ["posts"] });
+	},
+
+	invalidate(queryClient) {
+		queryClient.invalidateQueries({
+			queryKey: ["posts"],
+			refetchType: "none",
+		});
+	},
+};
+
+const useUpvotePost = createOptimisticUpvoteMutation({
+	mutationKey: ["upvote"],
+	mutationFn: upvotePost,
+	getId: (postId: string) => postId,
+	adapters: [postDetailAdapter, postsListAdapter],
+});
+
+export default useUpvotePost;
