@@ -1,6 +1,7 @@
 import { zValidator } from "@hono/zod-validator";
 import type { ApiResponse, Comment, PaginatedResponse } from "@shared/types";
 import { createCommentSchema } from "@shared/validators/comments.validation";
+import { sleep } from "bun";
 import { and, asc, countDistinct, desc, eq, sql } from "drizzle-orm";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";
@@ -175,6 +176,7 @@ const protectedRoutes = new Hono<ProtectedEnv>()
 			const { id } = c.req.valid("param");
 			const user = c.get("user");
 			let pointsChange: -1 | 1 = 1;
+			await sleep(1000); // Simulate network delay
 
 			const points = await db.transaction(async (tx) => {
 				const [existingUpvote] = await tx

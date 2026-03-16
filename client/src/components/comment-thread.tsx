@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useCurrentUser } from "@/contexts/current-user-context";
+import { useUpvoteComment } from "@/hooks/upvote";
 import { cn, relativeTime } from "@/lib/utils";
 import { subCommentsInfiniteQueryOptions } from "@/services/comments";
 import { LoadMoreRepliesButton } from "./load-more-replies-button";
@@ -31,6 +32,7 @@ export function CommentThread({
 	const { currentUser } = useCurrentUser();
 	const [isCollapsed, setIsCollapsed] = useState(false);
 	const queryClient = useQueryClient();
+	const { mutate: upvote } = useUpvoteComment();
 	const {
 		data: commentsData,
 		hasNextPage,
@@ -54,6 +56,13 @@ export function CommentThread({
 							currentUser ? "cursor-pointer" : "cursor-not-allowed opacity-60",
 							comment.isUpvoted ? "text-primary" : "text-muted-foreground",
 						)}
+						onClick={() =>
+							upvote({
+								commentId: comment.id,
+								parentCommentId: comment.parentCommentId,
+								postId: comment.postId.toString(),
+							})
+						}
 					>
 						<ChevronUpIcon size={20} />
 						<span className="font-medium">{comment.points}</span>

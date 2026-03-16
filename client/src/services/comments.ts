@@ -97,3 +97,14 @@ const getSubComments = async (
 	}
 	return data;
 };
+
+export async function upvoteComment(commentId: number) {
+	const res = await api.comments[":id"].upvote.$post({
+		param: { id: commentId.toString() },
+	});
+	const data = await res.json();
+	if (!data.success) {
+		throw new Error(`Failed to upvote comment: ${data.message}`);
+	}
+	return data;
+}
