@@ -74,7 +74,7 @@ const publicRoutes = new Hono<AppEnv>().get(
 
 const protectedRoutes = new Hono<ProtectedEnv>()
 	.post(
-		"/:id",
+		"/:id/comment",
 		requireAuth,
 		zValidator(
 			"param",

@@ -99,7 +99,28 @@ const getSubComments = async (
 	}
 	return data;
 };
-
+export async function createComment(postId: string, content: string) {
+	const res = await api.posts[":id"].comment.$post({
+		param: { id: postId },
+		form: { content },
+	});
+	const data = await res.json();
+	if (!data.success) {
+		throw new Error(`Failed to create comment: ${data.message}`);
+	}
+	return data;
+}
+export async function createSubComment(commentId: string, content: string) {
+	const res = await api.comments[":id"].comment.$post({
+		param: { id: commentId },
+		form: { content },
+	});
+	const data = await res.json();
+	if (!data.success) {
+		throw new Error(`Failed to create sub-comment: ${data.message}`);
+	}
+	return data;
+}
 export async function upvoteComment(commentId: string) {
 	const res = await api.comments[":id"].upvote.$post({
 		param: { id: commentId },
