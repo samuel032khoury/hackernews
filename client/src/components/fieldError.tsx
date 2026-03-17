@@ -3,7 +3,10 @@ import type { AnyFieldApi } from "@tanstack/react-form";
 export function FieldError({
 	field,
 	showOnChange = false,
-}: { field: AnyFieldApi; showOnChange?: boolean }) {
+}: {
+	field: AnyFieldApi;
+	showOnChange?: boolean;
+}) {
 	const errors = field.state.meta.errors;
 	const submitError = field.state.meta.errorMap.onSubmit;
 	if (submitError) {

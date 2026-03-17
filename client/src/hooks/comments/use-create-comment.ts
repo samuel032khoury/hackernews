@@ -1,6 +1,13 @@
+import type { Comment, PaginatedResponse } from "@shared/types";
+import type { InfiniteData } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { produce } from "immer";
 import { toast } from "sonner";
 import { createComment, createSubComment } from "@/services/comments";
+
+type SuccessOf<T> = Extract<T, { success: true }>;
+type CommentsPageSuccess = SuccessOf<PaginatedResponse<Comment>>;
+type CommentsCacheData = InfiniteData<CommentsPageSuccess, number>;
 
 type CreateCommentVariables = {
 	postId: string;
@@ -24,10 +31,19 @@ export function useCreateComment() {
 				? createComment(variables.postId, variables.content)
 				: createSubComment(variables.parentCommentId, variables.content),
 
-		onSuccess: (_data, variables) => {
-			queryClient.invalidateQueries({
-				queryKey: getCommentsQueryKey(variables),
-			});
+		onSuccess: (response, variables) => {
+			queryClient.setQueriesData<CommentsCacheData>(
+				{ queryKey: getCommentsQueryKey(variables) },
+				(old) => {
+					if (!old) return old;
+					return produce(old, (draft) => {
+						if (draft.pages.length > 0) {
+							draft.pages[0].data.unshift(response.data);
+						}
+					});
+				},
+			);
+
 			queryClient.invalidateQueries({
 				queryKey: ["post", variables.postId],
 			});
