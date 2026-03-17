@@ -1,13 +1,8 @@
-import type { Comment, PaginatedResponse } from "@shared/types";
-import type { InfiniteData } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { produce } from "immer";
 import { toast } from "sonner";
 import { createComment, createSubComment } from "@/services/comments";
-
-type SuccessOf<T> = Extract<T, { success: true }>;
-type CommentsPageSuccess = SuccessOf<PaginatedResponse<Comment>>;
-type CommentsCacheData = InfiniteData<CommentsPageSuccess, number>;
+import type { CommentsCacheData } from "@/types/query-types";
 
 type CreateCommentVariables = {
 	postId: string;

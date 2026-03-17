@@ -1,21 +1,14 @@
-import type {
-	ApiResponse,
-	PaginatedResponse,
-	Post,
-	UpvotableItemState,
-} from "@shared/types";
-import type { InfiniteData } from "@tanstack/react-query";
 import { produce } from "immer";
 import {
 	type CacheAdapter,
 	createOptimisticUpdateMutation,
 } from "@/hooks/use-optimistic-update";
 import { upvotePost } from "@/services/posts";
-
-type SuccessOf<T> = Extract<T, { success: true }>;
-type PostsPageSuccess = SuccessOf<PaginatedResponse<Post>>;
-type PostsListCacheData = InfiniteData<PostsPageSuccess, number>;
-type PostDetailsCacheData = SuccessOf<ApiResponse<Post>>;
+import type {
+	PostDetailsCacheData,
+	PostsListCacheData,
+	UpvotableItemState,
+} from "@/types/query-types";
 
 const findPostInListCache = (data: PostsListCacheData, postId: string) => {
 	for (const page of data.pages) {

@@ -1,19 +1,13 @@
-import type {
-	Comment,
-	PaginatedResponse,
-	UpvotableItemState,
-} from "@shared/types";
-import type { InfiniteData } from "@tanstack/react-query";
 import { produce } from "immer";
 import {
 	type CacheAdapter,
 	createOptimisticUpdateMutation,
 } from "@/hooks/use-optimistic-update";
 import { upvoteComment } from "@/services/comments";
-
-type SuccessOf<T> = Extract<T, { success: true }>;
-type CommentsPageSuccess = SuccessOf<PaginatedResponse<Comment>>;
-type CommentsCacheData = InfiniteData<CommentsPageSuccess, number>;
+import type {
+	CommentsCacheData,
+	UpvotableItemState,
+} from "@/types/query-types";
 
 type UpvoteCommentVariables = {
 	commentId: string;
