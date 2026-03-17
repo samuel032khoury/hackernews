@@ -4,21 +4,22 @@ A Hono-based REST API server for a Hacker News clone application with full authe
 
 ## Technology Stack
 
-| Category | Technology | Version |
-|----------|------------|---------|
-| **Runtime** | Bun | - |
-| **Framework** | Hono | - |
-| **Database** | PostgreSQL | - |
-| **ORM** | Drizzle ORM | ^0.44.5 |
-| **Validation** | Zod | ^4.1.11 |
-| **Auth** | BetterAuth | - |
+| Category | Technology |
+|----------|------------|
+| **Runtime** | Bun |
+| **Framework** | Hono |
+| **Database** | PostgreSQL |
+| **ORM** | Drizzle ORM |
+| **Validation** | Zod |
+| **Auth** | Better Auth |
 
 ### Key Dependencies
 
-- `@hono/zod-validator` - Request validation middleware
-- `drizzle-zod` - Schema-to-Zod type generation
-- `postgres` - PostgreSQL client
-- `shared` - Shared types and utilities (workspace package)
+- `@hono/zod-validator` — request validation middleware
+- `drizzle-zod` — schema-to-Zod type generation
+- `postgres` — PostgreSQL client
+- `shared` — shared types, validators, and config (workspace package)
+- `hono`, `better-auth`, `zod` — inherited from the root workspace
 
 ---
 
@@ -29,26 +30,26 @@ server/
 ├── src/
 │   ├── index.ts                 # App entry point & route composition
 │   ├── db/
-│   │   ├── index.ts             # Database connection
-│   │   ├── schema/              # Drizzle schemas
+│   │   ├── index.ts             # Database connection (Drizzle + postgres.js)
+│   │   ├── schema/
 │   │   │   ├── index.ts         # Barrel export
-│   │   │   ├── auth.schema.ts   # Users, sessions, accounts
-│   │   │   ├── posts.schema.ts  # Posts table & relations
-│   │   │   ├── comments.schema.ts # Comments (nested/threaded)
-│   │   │   └── upvotes.schema.ts  # Post & comment upvotes
-│   │   └── drizzle/             # Migration files
+│   │   │   ├── auth.schema.ts   # Users, sessions, accounts, verifications
+│   │   │   ├── posts.schema.ts  # Posts table, relations, check constraint
+│   │   │   ├── comments.schema.ts # Threaded comments, self-referential relation
+│   │   │   └── upvotes.schema.ts  # Post & comment upvotes, unique indexes
+│   │   └── drizzle/             # Generated migration files
 │   ├── lib/
-│   │   ├── auth.ts              # BetterAuth configuration
-│   │   ├── env.ts               # Environment & type definitions
-│   │   └── utils.ts             # SQL utility functions
+│   │   ├── auth.ts              # Better Auth configuration
+│   │   ├── env.ts               # Environment validation & Hono env types
+│   │   └── utils.ts             # SQL helpers (dates, upvote checks, validation)
 │   ├── middlewares/
 │   │   ├── authHandler.ts       # Session extraction middleware
 │   │   ├── requireAuth.ts       # Protected route guard
-│   │   └── errorHandler.ts      # Global error handler
-│   ├── routes/
-│   │   ├── auth.ts              # Auth routes (BetterAuth proxy)
-│   │   ├── posts.ts             # Posts CRUD & interactions
-│   │   └── comments.ts          # Comments CRUD & interactions
+│   │   └── errorHandler.ts      # Global error handler (Zod, HTTP, generic)
+│   └── routes/
+│       ├── auth.ts              # Auth routes (Better Auth proxy)
+│       ├── posts.ts             # Posts CRUD & interactions
+│       └── comments.ts          # Comment replies & upvoting
 ├── drizzle.config.ts            # Drizzle Kit configuration
 ├── package.json
 └── tsconfig.json
@@ -74,20 +75,22 @@ graph LR
     H -->|No| J[Handler]
     I --> J
     J --> K[Response]
-    E --> L[BetterAuth Handler]
+    E --> L[Better Auth Handler]
     L --> K
 ```
 
 ### Middleware Stack
 
-1. **CORS** - Cross-origin request handling
-2. **authHandler** - Extracts user/session from request headers and sets context variables
-3. **requireAuth** - Route-level guard that returns 401 if no authenticated user
+1. **CORS** — origin restricted to `CLIENT_URL`, credentials enabled
+2. **authHandler** — extracts user/session from request headers via Better Auth and sets context variables. Runs on every request.
+3. **requireAuth** — route-level guard applied per-handler on protected endpoints. Returns `401` if no authenticated user.
 
 ### Environment Types
 
+Routes are split into separate Hono instances with distinct environment types, providing compile-time guarantees about authentication state:
+
 ```typescript
-// Public routes - user may or may not be authenticated
+// Public routes — user may or may not be authenticated
 interface AppEnv extends Env {
   Variables: {
     user: User | null;
@@ -95,14 +98,24 @@ interface AppEnv extends Env {
   };
 }
 
-// Protected routes - user guaranteed to be authenticated
+// Protected routes — user guaranteed to be authenticated
 interface ProtectedEnv extends Env {
   Variables: {
-    user: User;      // Non-nullable
-    session: Session; // Non-nullable
+    user: User;      // non-nullable
+    session: Session; // non-nullable
   };
 }
 ```
+
+### Error Handling
+
+The global `handleError` handler produces consistent JSON responses for all error types:
+
+| Error Type | Status | Response Shape |
+|-----------|--------|----------------|
+| `ZodError` | 400 | `ValidationError` with per-field `issues[]` |
+| `HTTPException` | varies | `ApiError` with status from the exception |
+| Other | 500 | `ApiError` (stack trace in development, generic message in production) |
 
 ---
 
@@ -114,121 +127,125 @@ interface ProtectedEnv extends Env {
 erDiagram
     users ||--o{ posts : creates
     users ||--o{ comments : writes
-    users ||--o{ postUpvotes : upvotes
-    users ||--o{ commentUpvotes : upvotes
+    users ||--o{ post_upvotes : upvotes
+    users ||--o{ comment_upvotes : upvotes
     posts ||--o{ comments : contains
-    posts ||--o{ postUpvotes : receives
+    posts ||--o{ post_upvotes : receives
     comments ||--o{ comments : replies
-    comments ||--o{ commentUpvotes : receives
-    
+    comments ||--o{ comment_upvotes : receives
+
     users {
-        string id PK
-        string username
-        string displayUsername
-        string email
-        string name
-        string image
+        text id PK
+        text username UK
+        text displayUsername
+        text name
+        text email UK
         boolean emailVerified
-        datetime createdAt
+        text image
+        timestamp createdAt
+        timestamp updatedAt
     }
-    
-    
+
     posts {
-        string id PK
-        string userId FK
-        string title
-        string url
-        string content
-        int points
-        int commentsCount
-        datetime createdAt
+        serial id PK
+        text userId FK
+        text title
+        text url
+        text content
+        integer points
+        integer commentsCount
+        timestamp createdAt
     }
-    
+
     comments {
-        string id PK
-        string userId FK
-        string postId FK
-        string parentId FK
-        string content
-        int points
-        int depth
-        int commentCount
-        datetime createdAt
+        serial id PK
+        text userId FK
+        integer postId FK
+        integer parentCommentId FK
+        text content
+        integer points
+        integer depth
+        integer commentCount
+        timestamp createdAt
     }
-    
-    postUpvotes {
-        string id PK
-        string userId FK
-        string postId FK
-        datetime createdAt
+
+    post_upvotes {
+        serial id PK
+        text userId FK
+        integer postId FK
+        timestamp createdAt
     }
-    
-    commentUpvotes {
-        string id PK
-        string userId FK
-        string commentId FK
-        datetime createdAt
+
+    comment_upvotes {
+        serial id PK
+        text userId FK
+        integer commentId FK
+        timestamp createdAt
     }
 ```
 
 ### Tables
 
 #### `users`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | text | Primary key |
-| username | text | Unique username |
-| displayUsername | text | Displaying username |
-| name | text | Display name |
-| email | text | Unique email |
-| emailVerified | boolean | Email verification status |
-| image | text | Profile image URL |
-| createdAt | timestamp | Account creation |
-| updatedAt | timestamp | Last update |
+| Column | Type | Default | Constraints |
+|--------|------|---------|-------------|
+| id | text | — | PRIMARY KEY |
+| username | text | — | NOT NULL, UNIQUE |
+| displayUsername | text | — | NOT NULL |
+| name | text | — | NOT NULL |
+| email | text | — | NOT NULL, UNIQUE |
+| emailVerified | boolean | false | NOT NULL |
+| image | text | — | nullable |
+| createdAt | timestamp | now() | NOT NULL |
+| updatedAt | timestamp | now() | NOT NULL, auto-updated |
+
+Better Auth also manages `sessions`, `accounts`, and `verifications` tables for session management, OAuth providers, and email verification tokens.
 
 #### `posts`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | serial | Primary key |
-| userId | text | Author reference |
-| title | text | Post title |
-| url | text | Optional link URL |
-| content | text | Optional text content |
-| points | integer | Upvote count (default: 0) |
-| commentsCount | integer | Comment count (default: 0) |
-| createdAt | timestamp | Creation time |
+| Column | Type | Default | Constraints |
+|--------|------|---------|-------------|
+| id | serial | — | PRIMARY KEY |
+| userId | text | — | NOT NULL |
+| title | text | — | NOT NULL |
+| url | text | — | nullable |
+| content | text | — | nullable |
+| points | integer | 0 | NOT NULL, CHECK >= 0 |
+| commentsCount | integer | 0 | NOT NULL |
+| createdAt | timestamp(tz) | now() | NOT NULL |
 
 #### `comments`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | serial | Primary key |
-| userId | text | Author reference |
-| postId | integer | Parent post reference |
-| parentCommentId | integer | Parent comment (for threading) |
-| content | text | Comment text |
-| points | integer | Upvote count (default: 0) |
-| depth | integer | Nesting level (default: 0) |
-| commentCount | integer | Reply count (default: 0) |
-| createdAt | timestamp | Creation time |
+| Column | Type | Default | Constraints |
+|--------|------|---------|-------------|
+| id | serial | — | PRIMARY KEY |
+| userId | text | — | NOT NULL |
+| postId | integer | — | NOT NULL |
+| parentCommentId | integer | — | nullable (self-referential) |
+| content | text | — | NOT NULL |
+| points | integer | 0 | NOT NULL |
+| depth | integer | 0 | NOT NULL |
+| commentCount | integer | 0 | NOT NULL |
+| createdAt | timestamp(tz) | now() | NOT NULL |
 
-#### `postUpvotes` / `commentUpvotes`
-| Column | Type | Description |
-|--------|------|-------------|
-| id | serial | Primary key |
-| userId | text | User who upvoted |
-| postId/commentId | integer | Target reference |
-| createdAt | timestamp | Upvote time |
+#### `post_upvotes` / `comment_upvotes`
+| Column | Type | Default | Constraints |
+|--------|------|---------|-------------|
+| id | serial | — | PRIMARY KEY |
+| userId | text | — | NOT NULL |
+| postId / commentId | integer | — | NOT NULL |
+| createdAt | timestamp(tz) | now() | NOT NULL |
+| | | | UNIQUE(userId, postId/commentId) |
 
 ---
 
 ## API Endpoints
 
-### Base URL
 All endpoints are prefixed with `/api`.
 
-### Authentication Routes (`/api/auth/*`)
+**Legend:** 🔒 = requires authentication
 
-BetterAuth handles all auth routes automatically. Key endpoints include:
+### Authentication (`/api/auth/*`)
+
+Better Auth handles all auth routes automatically. Key endpoints:
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -240,134 +257,126 @@ BetterAuth handles all auth routes automatically. Key endpoints include:
 
 ---
 
-### Posts Routes (`/api/posts`)
+### Posts (`/api/posts`)
 
 #### `GET /posts`
-List all posts with pagination and filtering.
+List posts with pagination, sorting, and filtering.
 
-**Query Parameters:**
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|
 | limit | number | 10 | Items per page |
 | page | number | 1 | Page number |
-| sortBy | "points" \| "recent" | "recent" | Sort field |
-| order | "asc" \| "desc" | "desc" | Sort direction |
-| author | string | - | Filter by author ID |
-| site | string | - | Filter by URL |
+| sortBy | `"points"` \| `"recent"` | `"recent"` | Sort field |
+| order | `"asc"` \| `"desc"` | `"desc"` | Sort direction |
+| author | string | — | Filter by user ID |
+| site | string | — | Filter by exact URL |
 
-**Response:** `PaginatedResponse<Post[]>`
+When sorting by points, a secondary sort on `createdAt` (descending) is applied as a tiebreaker.
+
+**Response:** `PaginatedResponse<Post>`
 
 ---
 
 #### `GET /posts/:id`
-Get a single post by ID.
+Get a single post by ID. Includes `isUpvoted` status for the current user.
 
 **Response:** `ApiResponse<Post>`
-
-**Errors:**
-- `404` - Post not found
+**Errors:** `404` — Post not found
 
 ---
 
 #### `POST /posts` 🔒
 Create a new post.
 
-**Body (form-data):**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| title | string | ✓ | Post title (3-255 chars) |
-| url | string | ✗ | Valid URL |
-| content | string | ✗ | Text content (max 5000 chars) |
+| Field | Type | Required | Validation |
+|-------|------|----------|------------|
+| title | string | yes | 3–255 characters |
+| url | string | no | Valid URL or empty |
+| content | string | no | Max 5000 characters |
 
-> **Note:** Either `url` OR `content` is required.
+At least one of `url` or `content` must be provided (enforced by a Zod refinement).
 
-**Response:** `ApiResponse<{ postId: number }>`
+**Response:** `ApiResponse<{ postId: number }>` (status 201)
 
 ---
 
 #### `POST /posts/:id/upvote` 🔒
-Toggle upvote on a post. If already upvoted, removes the upvote.
+Toggle upvote on a post. Upvoting again removes the upvote.
 
-**Response:** `ApiResponse<PostState>`
-
-**Errors:**
-- `404` - Post not found
+**Response:** `ApiResponse<UpvotableItemState>`
+**Errors:** `404` — Post not found
 
 ---
 
 #### `POST /posts/:id/comment` 🔒
-Add a top-level comment to a post.
+Add a top-level comment to a post. Increments the post's `commentsCount` within a transaction.
 
-**Body (form-data):**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| content | string | ✓ | Comment text (1-1000 chars) |
+| Field | Type | Required | Validation |
+|-------|------|----------|------------|
+| content | string | yes | 1–1000 characters (trimmed) |
 
 **Response:** `ApiResponse<Comment>`
-
-**Errors:**
-- `404` - Post not found
+**Errors:** `404` — Post not found
 
 ---
 
 #### `GET /posts/:id/comments`
-Get paginated top-level comments for a post.
+Get paginated top-level comments for a post (where `parentCommentId` is null).
 
-**Query Parameters:**
 | Param | Type | Default | Description |
 |-------|------|---------|-------------|
 | limit | number | 10 | Items per page |
 | page | number | 1 | Page number |
-| sortBy | "points" \| "recent" | "recent" | Sort field |
-| order | "asc" \| "desc" | "desc" | Sort direction |
-| includeChildren | boolean | false | Include first 2 child comments |
+| sortBy | `"points"` \| `"recent"` | `"recent"` | Sort field |
+| order | `"asc"` \| `"desc"` | `"desc"` | Sort direction |
+| includeChildren | boolean | false | Include up to 2 child comments per top-level comment |
 
-**Response:** `PaginatedResponse<Comment[]>`
+Uses Drizzle's relational query API with `extras` for computed fields (`createdAt` as ISO string, `isUpvoted` via EXISTS subquery).
 
-**Errors:**
-- `404` - Post not found
+**Response:** `PaginatedResponse<Comment>`
+**Errors:** `404` — Post not found
 
 ---
 
-### Comments Routes (`/api/comments`)
+### Comments (`/api/comments`)
 
 #### `GET /comments/:id/comments`
 Get child comments (replies) of a comment.
 
-**Query Parameters:** Same as `GET /posts/:id/comments` (without `includeChildren`)
+| Param | Type | Default | Description |
+|-------|------|---------|-------------|
+| limit | number | 10 | Items per page |
+| page | number | 1 | Page number |
+| sortBy | `"points"` \| `"recent"` | `"recent"` | Sort field |
+| order | `"asc"` \| `"desc"` | `"desc"` | Sort direction |
 
-**Response:** `PaginatedResponse<Comment[]>`
+**Response:** `PaginatedResponse<Comment>`
 
 ---
 
-#### `POST /comments/:id` 🔒
-Reply to an existing comment.
+#### `POST /comments/:id/comment` 🔒
+Reply to an existing comment. Within a transaction: increments the parent comment's `commentCount`, increments the post's `commentsCount`, and inserts the reply with `depth = parent.depth + 1`.
 
-**Body (form-data):**
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| content | string | ✓ | Reply text (1-1000 chars) |
+| Field | Type | Required | Validation |
+|-------|------|----------|------------|
+| content | string | yes | 1–1000 characters (trimmed) |
 
 **Response:** `ApiResponse<Comment>`
-
-**Errors:**
-- `404` - Parent comment not found
+**Errors:** `404` — Parent comment not found
 
 ---
 
 #### `POST /comments/:id/upvote` 🔒
 Toggle upvote on a comment.
 
-**Response:** `ApiResponse<{ commentUpvotes: { userId: string }[]; points: number }>`
-
-**Errors:**
-- `404` - Comment not found
+**Response:** `ApiResponse<{ isUpvoted: boolean; points: number }>`
+**Errors:** `404` — Comment not found
 
 ---
 
 ## Response Types
 
-All response types are defined in the `shared` workspace package and can be imported from `shared/types`.
+All response types are defined in the `shared` workspace package and imported from `@shared/types`.
 
 ### Success Response
 ```typescript
@@ -385,7 +394,7 @@ type ApiResponse<T = void> = SuccessResponse<T> | ErrorResponse;
 ### Paginated Response
 ```typescript
 type PaginatedResponse<T> =
-  | (SuccessResponse<Array<T>> & {
+  | (SuccessResponse<T[]> & {
       pagination: {
         totalPages: number;
         page: number;
@@ -403,10 +412,7 @@ type ApiError = {
   message: string;
   code?: string;
 };
-```
 
-### Validation Error
-```typescript
 type ValidationError = {
   success: false;
   code: "VALIDATION_ERROR";
@@ -447,7 +453,7 @@ interface Comment {
   parentCommentId: number | null;
   createdAt: string;
   commentCount: number;
-  commentUpvotes: { userId: string }[];
+  isUpvoted: boolean;
   childComments?: Comment[];
   author: {
     id: string;
@@ -455,7 +461,7 @@ interface Comment {
   };
 }
 
-interface PostState {
+interface UpvotableItemState {
   isUpvoted: boolean;
   points: number;
 }
@@ -466,29 +472,38 @@ interface PostState {
 ## Design Decisions
 
 ### 1. Route Separation by Auth Requirements
-Routes are split into `publicRoutes` and `protectedRoutes` using separate Hono instances with different environment types (`AppEnv` vs `ProtectedEnv`). This provides type-safety guarantees - in protected routes, `c.get("user")` returns `User` (not `User | null`).
+Routes are split into `publicRoutes` and `protectedRoutes` using separate Hono instances with different environment types (`AppEnv` vs `ProtectedEnv`). This provides type-safety guarantees — in protected routes, `c.get("user")` returns `User` (non-nullable), not `User | null`.
 
 ### 2. Transaction-Based Upvoting
-Upvotes use database transactions to ensure atomicity:
-1. Check if upvote exists
-2. Update points counter (+1 or -1)
-3. Insert or delete upvote record
+Both post and comment upvotes use database transactions for atomicity. The two implementations use different strategies:
 
-This prevents race conditions and ensures consistency.
+**Post upvotes** use an optimistic INSERT ON CONFLICT pattern:
+1. Attempt `INSERT ... ON CONFLICT DO NOTHING` on the upvote
+2. If the insert returned a row, it's a new upvote (+1 point)
+3. If nothing was inserted, the upvote already existed — delete it and decrement (-1 point)
+4. Update the post's `points` counter atomically
+
+**Comment upvotes** use a SELECT-then-toggle pattern:
+1. Check if an upvote record exists
+2. Update the comment's `points` counter (+1 or -1)
+3. Insert or delete the upvote record accordingly
+
+Both approaches ensure consistency via transactions and prevent race conditions.
 
 ### 3. Threaded Comments with Depth Tracking
-Comments support infinite nesting via self-referential `parentCommentId`. The `depth` field tracks nesting level for UI rendering. When fetching comments:
-- Top-level comments have `parentCommentId = NULL` and `depth = 0`
-- Child comments are fetched via the `childComments` relation
+Comments support infinite nesting via the self-referential `parentCommentId` column. The `depth` field tracks nesting level (0 for top-level). When creating a reply, `depth` is set to `parent.depth + 1` within a transaction that also increments both the parent comment's `commentCount` and the post's `commentsCount`.
 
 ### 4. Denormalized Counters
-`posts.commentsCount` and `comments.commentCount` are denormalized counters updated during transactions. This trades write complexity for read performance.
+`posts.commentsCount`, `posts.points`, `comments.commentCount`, and `comments.points` are denormalized counters updated within transactions. This trades write complexity for O(1) read performance on counts.
 
-### 5. Zod Validation with throwValidationError
-All validators use a centralized `throwValidationError` callback that throws validation errors to be caught by the global error handler, providing consistent error responses.
+### 5. Computed `isUpvoted` Field
+For posts, `isUpvoted` is computed via a LEFT JOIN on `post_upvotes` scoped to the current user, using a `CASE WHEN ... IS NOT NULL` expression. For comments, it uses an `EXISTS` subquery against `comment_upvotes` (via `getCommentIsUpvotedQuery`). When no user is authenticated, it short-circuits to `false`.
 
-### 6. ISO Date Formatting at Database Level
-The `getISOFormatDateQuery` utility formats timestamps to ISO 8601 strings in SQL queries, ensuring consistent date formatting without JavaScript overhead.
+### 6. Zod Validation with `throwValidationError`
+All `@hono/zod-validator` calls use a centralized `throwValidationError` callback that re-throws the Zod error, letting the global error handler produce a consistent `ValidationError` response shape.
+
+### 7. ISO Date Formatting at Database Level
+The `getISOFormatDateQuery` utility formats timestamps to ISO 8601 strings via `to_char(col, 'YYYY-MM-DD"T"HH24:MI:SS"Z"')` in SQL, avoiding per-row JavaScript date formatting.
 
 ---
 
@@ -504,20 +519,23 @@ CLIENT_URL=http://localhost:5173
 | Variable | Description |
 |----------|-------------|
 | `DATABASE_URL` | PostgreSQL connection string |
-| `CLIENT_URL` | Frontend origin (for CORS & BetterAuth) |
+| `CLIENT_URL` | Frontend origin (used for CORS and Better Auth `trustedOrigins`) |
+
+Both are validated at startup with Zod (`z.url()`). The server will crash immediately if either is missing or malformed.
 
 ---
 
-## Development
-
-### Scripts
+## Scripts
 
 ```bash
 # Start dev server with hot reload
 bun run dev
 
-# Build TypeScript
+# Build TypeScript (uses tsc -b for project references)
 bun run build
+
+# Serve the production build
+bun run preview
 
 # Generate Drizzle migrations
 bun run db:generate
@@ -532,15 +550,15 @@ bun run db:studio
 bun run clean
 ```
 
+The `predev` hook automatically runs `db:generate` and `db:migrate` before starting the dev server.
+
 ### Type Exports
 
 The package exports types for Hono RPC client usage:
 
 ```typescript
-// In client code
 import type { AppType } from "server";
 import { hc } from "hono/client";
 
 const client = hc<AppType>("/api");
 ```
-
