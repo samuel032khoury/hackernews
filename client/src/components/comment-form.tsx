@@ -1,5 +1,6 @@
 import { createCommentSchema } from "@shared/validators/comments.validation";
 import { useForm } from "@tanstack/react-form";
+import { useCreateComment } from "@/hooks/comments/use-create-comment";
 import { FieldError } from "./fieldError";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
@@ -13,6 +14,7 @@ export function CommentForm({
 	parentCommentId?: string;
 	onCompletion?: () => void;
 }) {
+	const { mutateAsync: createComment } = useCreateComment();
 	const form = useForm({
 		defaultValues: {
 			content: "",
@@ -20,11 +22,26 @@ export function CommentForm({
 		validators: {
 			onChange: createCommentSchema,
 		},
-		onSubmit: async () => {
-			console.log(postId, parentCommentId);
-			onCompletion?.();
+		onSubmit: async ({ value }) => {
+			await createComment(
+				{
+					postId: postId,
+					content: value.content,
+					parentCommentId: parentCommentId ?? null,
+				},
+				{
+					onSuccess: (data) => {
+						if (!data.success) {
+							return;
+						}
+						form.reset();
+						onCompletion?.();
+					},
+				},
+			);
 		},
 	});
+	const isSubmitting = form.baseStore.state.isSubmitting;
 	return (
 		<form
 			onSubmit={(e) => {
@@ -47,12 +64,24 @@ export function CommentForm({
 							placeholder="Enter comments here..."
 							rows={4}
 							className="w-full p-2 text-sm"
+							disabled={isSubmitting}
 						/>
 						<FieldError field={field} showOnChange />
 					</div>
 				)}
 			</form.Field>
 			<div className="flex justify-end space-x-2">
+				<Button
+					type="button"
+					variant="outline"
+					onClick={() => {
+						form.reset();
+						onCompletion?.();
+					}}
+					disabled={isSubmitting}
+				>
+					{parentCommentId ? "Cancel" : "Reset"}
+				</Button>
 				<form.Subscribe
 					selector={(state) => [
 						state.canSubmit,
