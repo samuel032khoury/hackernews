@@ -1,4 +1,5 @@
 import { Hono } from "hono";
+import { serveStatic } from "hono/bun";
 import { cors } from "hono/cors";
 import { processEnv } from "@/lib/env";
 import authHandler from "@/middlewares/authHandler";
@@ -7,7 +8,7 @@ import { authRoutes } from "@/routes/auth";
 import { commentRouter } from "@/routes/comments";
 import { postRouter } from "@/routes/posts";
 
-const app = new Hono()
+const api = new Hono()
 	.use(
 		cors({
 			origin: processEnv.CLIENT_URL,
@@ -21,5 +22,14 @@ const app = new Hono()
 	.route("/comments", commentRouter)
 	.onError(handleError);
 
-export default app;
-export type AppType = typeof app;
+const app = new Hono()
+	.route("/", api)
+	.use("*", serveStatic({ root: "../client/dist" }))
+	.get("*", serveStatic({ root: "../client/dist", path: "index.html" }));
+
+export default {
+	port: process.env.PORT || 3000,
+	hostname: "0.0.0.0",
+	fetch: app.fetch,
+};
+export type AppType = typeof api;

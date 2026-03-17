@@ -130,11 +130,21 @@ Build all packages:
 bun run build
 ```
 
-Preview production output (package-specific behavior):
+Preview production (single server for API + client):
 
 ```bash
 bun run preview
 ```
+
+This builds all packages, then runs only the server. The server serves the API at `/api` and the built client at `/` (static files from `client/dist` plus SPA fallback).
+
+To run the production server from the repo root without Turbo (e.g. after a manual build), use:
+
+```bash
+bun run start
+```
+
+This runs `bun --cwd server run dist/src/index.js`, so the working directory is `server/`, `.env` is loaded from `server/.env`, and the static root `../client/dist` resolves correctly.
 
 ### 8) Useful scripts
 
@@ -143,6 +153,8 @@ From repo root:
 - `bun run dev` — start all workspace dev tasks
 - `bun run dev:client` — run only client dev
 - `bun run dev:server` — run only server dev
+- `bun run preview` — build all, then run server (serves API + built client)
+- `bun run start` — run production server from root (uses `--cwd server`; run after `bun run build`)
 - `bun run type-check` — workspace type-check
 - `bun run lint` — Biome checks + fixes
 - `bun run format` — Biome format

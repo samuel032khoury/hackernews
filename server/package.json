@@ -20,6 +20,7 @@
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
 		"preview": "bun run dist/src/index.js",
+		"start": "bun run dist/src/index.js",
 		"clean": "rm -rf dist .turbo",
 		"predev": "bun run db:generate && bun run db:migrate"
 	},

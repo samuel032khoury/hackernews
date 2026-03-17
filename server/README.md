@@ -28,7 +28,7 @@ A Hono-based REST API server for a Hacker News clone application with full authe
 ```
 server/
 ├── src/
-│   ├── index.ts                 # App entry point & route composition
+│   ├── index.ts                 # App entry: API sub-app + serveStatic (client dist)
 │   ├── db/
 │   │   ├── index.ts             # Database connection (Drizzle + postgres.js)
 │   │   ├── schema/
@@ -59,6 +59,10 @@ server/
 
 ## Architecture
 
+### Serving the built client
+
+When running the production build (`preview` or `start`), the server serves both the API and the built client from a single process. Static files are read from `../client/dist` (relative to the server working directory); the root app uses Hono’s `serveStatic` so that non-API requests are served as files when they exist, and fall back to `index.html` for SPA client-side routing. In development, the client runs on its own Vite dev server and proxies `/api` to this server.
+
 ### Request Flow
 
 ```mermaid
@@ -79,10 +83,10 @@ graph LR
     L --> K
 ```
 
-### Middleware Stack
+### Middleware Stack (API only)
 
 1. **CORS** — origin restricted to `CLIENT_URL`, credentials enabled
-2. **authHandler** — extracts user/session from request headers via Better Auth and sets context variables. Runs on every request.
+2. **authHandler** — extracts user/session from request headers via Better Auth and sets context variables. Runs on every API request.
 3. **requireAuth** — route-level guard applied per-handler on protected endpoints. Returns `401` if no authenticated user.
 
 ### Environment Types
@@ -528,14 +532,15 @@ Both are validated at startup with Zod (`z.url()`). The server will crash immedi
 ## Scripts
 
 ```bash
-# Start dev server with hot reload
+# Start dev server with hot reload (API only; client runs separately via Vite)
 bun run dev
 
 # Build TypeScript (uses tsc -b for project references)
 bun run build
 
-# Serve the production build
+# Serve production build (API + static client from ../client/dist)
 bun run preview
+# Or: bun run start (same command; alias for clarity)
 
 # Generate Drizzle migrations
 bun run db:generate
@@ -550,7 +555,8 @@ bun run db:studio
 bun run clean
 ```
 
-The `predev` hook automatically runs `db:generate` and `db:migrate` before starting the dev server.
+- **preview** / **start** — Both run the built server (`dist/src/index.js`). The server serves the API at `/api` and the built client at `/` (static files from `../client/dist` plus SPA fallback). Use **preview** when invoked via the root workspace (`turbo preview --filter=server`); use **start** when running from the repo root (`bun run start` uses `bun --cwd server run dist/src/index.js` so `.env` and the static root resolve correctly).
+- The `predev` hook automatically runs `db:generate` and `db:migrate` before starting the dev server.
 
 ### Type Exports
 
