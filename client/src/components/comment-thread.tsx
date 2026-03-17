@@ -6,7 +6,7 @@ import {
 	MinusCircle,
 	PlusCircle,
 } from "lucide-react";
-import { useState } from "react";
+import { memo, useState } from "react";
 import { useCurrentUser } from "@/contexts/current-user-context";
 import { useUpvoteComment } from "@/hooks/upvote";
 import { cn, relativeTime } from "@/lib/utils";
@@ -23,7 +23,7 @@ type CommentThreadProps = {
 	isLast: boolean;
 };
 
-export function CommentThread({
+export const CommentThread = memo(function CommentThread({
 	comment,
 	depth = 0,
 	activeReplyId,
@@ -144,4 +144,12 @@ export function CommentThread({
 			{!isLast && <Separator className="my-2" />}
 		</div>
 	);
-}
+}, (prev, next) => {
+	if (prev.comment !== next.comment) return false;
+	if (prev.depth !== next.depth) return false;
+	if (prev.isLast !== next.isLast) return false;
+	if (prev.setActiveReplyId !== next.setActiveReplyId) return false;
+	const prevReplying = prev.activeReplyId === prev.comment.id.toString();
+	const nextReplying = next.activeReplyId === next.comment.id.toString();
+	return prevReplying === nextReplying;
+});
