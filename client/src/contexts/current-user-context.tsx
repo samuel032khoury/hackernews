@@ -3,6 +3,7 @@ import { createContext, useContext } from "react";
 import { currentUserQueryOptions } from "@/services/users";
 
 type CurrentUser = {
+	id: string;
 	name: string | null | undefined;
 	email: string | null | undefined;
 	username: string | null | undefined;

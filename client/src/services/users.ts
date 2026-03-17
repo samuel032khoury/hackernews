@@ -9,6 +9,7 @@ const getCurrentUser = async () => {
 	}
 
 	return {
+		id: session.user.id,
 		name: session.user.name,
 		email: session.user.email,
 		username: session.user.username,
