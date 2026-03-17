@@ -10,9 +10,9 @@ import "./index.css";
 
 const queryClient = new QueryClient();
 
-import { ErrorComponent } from "./components/errorComponent";
-import { LoadingComponent } from "./components/loadingComponent";
-import { NotFoundComponent } from "./components/notFoundComponent";
+import { ErrorComponent } from "./components/error-component";
+import { LoadingComponent } from "./components/loading-component";
+import { NotFoundComponent } from "./components/not-found-component";
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
 

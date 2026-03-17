@@ -14,7 +14,7 @@ import {
 	SheetTitle,
 	SheetTrigger,
 } from "./ui/sheet";
-import { UserControls } from "./userControls";
+import { UserControls } from "./user-controls";
 
 export function Header() {
 	const navigate = useNavigate();

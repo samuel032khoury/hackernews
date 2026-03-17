@@ -10,7 +10,7 @@ import {
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { FieldError } from "@/components/fieldError";
+import { FieldError } from "@/components/field-error";
 import { Button } from "@/components/ui/button";
 import {
 	Card,

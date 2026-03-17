@@ -3,7 +3,7 @@ import { useForm } from "@tanstack/react-form";
 import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, useBlocker, useRouter } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { FieldError } from "@/components/fieldError";
+import { FieldError } from "@/components/field-error";
 import { Button } from "@/components/ui/button";
 import {
 	Card,

@@ -1,7 +1,7 @@
 import { createCommentSchema } from "@shared/validators/comments.validation";
 import { useForm } from "@tanstack/react-form";
 import { useCreateComment } from "@/hooks/comments/use-create-comment";
-import { FieldError } from "./fieldError";
+import { FieldError } from "./field-error";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
 
