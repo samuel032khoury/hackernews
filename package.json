@@ -11,19 +11,19 @@
 		"./shared"
 	],
 	"scripts": {
-		"dev": "turbo dev",
+		"dev": "bun run clean && turbo dev",
 		"dev:client": "turbo dev --filter=client",
 		"dev:server": "turbo dev --filter=server",
 		"build": "turbo build",
 		"build:client": "turbo build --filter=client",
 		"build:server": "turbo build --filter=server",
+		"preview": "turbo build && turbo preview --filter=server",
+		"start": "bun run --cwd server start",
 		"lint": "biome check --write",
 		"format": "biome format --write",
 		"type-check": "turbo type-check",
 		"test": "turbo test",
-		"preview": "turbo build && turbo preview --filter=server",
-		"start": "bun --cwd server run dist/src/index.js",
-		"clean": "turbo clean && rm -rf .turbo",
+		"clean": "turbo clean",
 		"eject": "rm -rf node_modules && rm -rf .turbo"
 	},
 	"dependencies": {
