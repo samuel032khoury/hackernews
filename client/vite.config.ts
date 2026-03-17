@@ -23,6 +23,36 @@ export default defineConfig(({ mode }) => {
 				"@server": path.resolve(__dirname, "../server/src"),
 			},
 		},
+		build: {
+			rollupOptions: {
+				output: {
+					manualChunks: {
+						"react-vendor": ["react", "react-dom"],
+						"tanstack-query": ["@tanstack/react-query"],
+						"tanstack-router": ["@tanstack/react-router"],
+						"tanstack-form": ["@tanstack/react-form"],
+						"radix-ui": [
+							"@radix-ui/react-accordion",
+							"@radix-ui/react-dialog",
+							"@radix-ui/react-label",
+							"@radix-ui/react-select",
+							"@radix-ui/react-separator",
+							"@radix-ui/react-slot",
+							"radix-ui",
+						],
+						"ui-vendor": [
+							"lucide-react",
+							"sonner",
+							"class-variance-authority",
+							"clsx",
+							"tailwind-merge",
+							"next-themes",
+						],
+						"better-auth": ["better-auth"],
+					},
+				},
+			},
+		},
 		server: {
 			proxy: {
 				"/api": {

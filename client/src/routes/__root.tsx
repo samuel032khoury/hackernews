@@ -1,11 +1,26 @@
 import type { QueryClient } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import { Suspense, lazy } from "react";
 import { Toaster } from "sonner";
 import { Header } from "@/components/header";
 import { CurrentUserProvider } from "@/contexts/current-user-context";
 import { currentUserQueryOptions } from "@/services/users";
+
+const TanStackRouterDevtools = import.meta.env.DEV
+	? lazy(() =>
+			import("@tanstack/react-router-devtools").then((m) => ({
+				default: m.TanStackRouterDevtools,
+			})),
+		)
+	: () => null;
+
+const ReactQueryDevtools = import.meta.env.DEV
+	? lazy(() =>
+			import("@tanstack/react-query-devtools").then((m) => ({
+				default: m.ReactQueryDevtools,
+			})),
+		)
+	: () => null;
 
 interface AppRouterContext {
 	queryClient: QueryClient;
@@ -29,8 +44,10 @@ export const Route = createRootRouteWithContext<AppRouterContext>()({
 				</footer>
 			</div>
 			<Toaster />
-			<TanStackRouterDevtools />
-			<ReactQueryDevtools />
+			<Suspense>
+				<TanStackRouterDevtools />
+				<ReactQueryDevtools />
+			</Suspense>
 		</CurrentUserProvider>
 	),
 });
