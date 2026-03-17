@@ -1,4 +1,19 @@
 services:
+  app:
+    build: .
+    container_name: hackernews-app
+    ports:
+      - "3000:3000"
+    environment:
+      - BETTER_AUTH_URL=http://localhost:3000
+      - BETTER_AUTH_SECRET=yMVwuKgj2sm1N7Ogbf5u52Qfena9o2hI
+      - DATABASE_URL=postgresql://user:password@hackernews-db:5432/hackernewsdb
+      - HOSTNAME=0.0.0.0
+      - PORT=3000
+    depends_on:
+      - hackernews-db
+    networks:
+      - hackernews-network
   hackernews-db:
     image: postgres:latest
     container_name: hackernews-db
