@@ -1,6 +1,6 @@
 import type { QueryClient } from "@tanstack/react-query";
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
-import { Suspense, lazy } from "react";
+import { lazy, Suspense } from "react";
 import { Toaster } from "sonner";
 import { Header } from "@/components/header";
 import { CurrentUserProvider } from "@/contexts/current-user-context";

@@ -45,13 +45,13 @@ export const PostCard = ({ post }: { post: Post }) => {
 									{post.title}
 								</a>
 							) : (
-							<Link
-								to="/post/$id"
-								params={{ id: post.id.toString() }}
-								className="text-foreground hover:text-primary hover:underline"
-							>
-								{post.title}
-							</Link>
+								<Link
+									to="/post/$id"
+									params={{ id: post.id.toString() }}
+									className="text-foreground hover:text-primary hover:underline"
+								>
+									{post.title}
+								</Link>
 							)}
 							{post.url && (
 								<Badge variant={"secondary"} asChild>
@@ -61,12 +61,12 @@ export const PostCard = ({ post }: { post: Post }) => {
 										search={{ site: post.url }}
 									>
 										{(() => {
-										try {
-											return new URL(post.url!).hostname;
-										} catch {
-											return post.url;
-										}
-									})()}
+											try {
+												return new URL(post.url).hostname;
+											} catch {
+												return post.url;
+											}
+										})()}
 									</Link>
 								</Badge>
 							)}
@@ -95,12 +95,12 @@ export const PostCard = ({ post }: { post: Post }) => {
 							<span>{relativeTime(post.createdAt)}</span>
 							<span>•</span>
 							<Link
-							to="/post/$id"
-							params={{ id: post.id.toString() }}
-							className="hover:text-foreground/80 hover:underline"
-						>
-							{post.commentsCount} comment
-							{post.commentsCount > 1 ? "s" : ""}
+								to="/post/$id"
+								params={{ id: post.id.toString() }}
+								className="hover:text-foreground/80 hover:underline"
+							>
+								{post.commentsCount} comment
+								{post.commentsCount > 1 ? "s" : ""}
 							</Link>
 						</div>
 					</CardDescription>
