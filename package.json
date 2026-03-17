@@ -21,6 +21,7 @@
 		"format": "biome format --write",
 		"type-check": "turbo type-check",
 		"test": "turbo test",
+		"preview": "turbo build && turbo preview",
 		"clean": "turbo clean && rm -rf .turbo",
 		"eject": "rm -rf node_modules && rm -rf .turbo"
 	},

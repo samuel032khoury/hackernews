@@ -91,6 +91,11 @@
 			"outputs": ["coverage/**", ".nyc_output/**", "test-results/**"],
 			"env": ["NODE_ENV", "CI"]
 		},
+		"preview": {
+			"dependsOn": ["build"],
+			"cache": false,
+			"persistent": true
+		},
 		"clean": {
 			"cache": false
 		}
