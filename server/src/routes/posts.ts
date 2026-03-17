@@ -178,8 +178,11 @@ const publicRoutes = new Hono<AppEnv>()
 			const user = c.get("user");
 			const offset = (page - 1) * limit;
 			const sortByColumn = sortBy === "points" ? posts.points : posts.createdAt;
+			const orderFn = order === "desc" ? desc : asc;
 			const sortOrder =
-				order === "desc" ? desc(sortByColumn) : asc(sortByColumn);
+				sortBy === "points"
+					? [orderFn(sortByColumn), desc(posts.createdAt)]
+					: [orderFn(sortByColumn)];
 			const { count } = await db
 				.select({ count: countDistinct(posts.id) })
 				.from(posts)
@@ -211,7 +214,7 @@ const publicRoutes = new Hono<AppEnv>()
 				})
 				.from(posts)
 				.innerJoin(users, eq(posts.userId, users.id))
-				.orderBy(sortOrder)
+				.orderBy(...sortOrder)
 				.limit(limit)
 				.offset(offset)
 				.where(
@@ -271,9 +274,13 @@ const publicRoutes = new Hono<AppEnv>()
 				throw new HTTPException(404, { message: "Post not found" });
 			}
 
-			const sortByColumn = sortBy === "points" ? posts.points : posts.createdAt;
+			const sortByColumn =
+				sortBy === "points" ? comments.points : comments.createdAt;
+			const orderFn = order === "desc" ? desc : asc;
 			const sortOrder =
-				order === "desc" ? desc(sortByColumn) : asc(sortByColumn);
+				sortBy === "points"
+					? [orderFn(sortByColumn), desc(comments.createdAt)]
+					: [orderFn(sortByColumn)];
 			const { count } = await db
 				.select({ count: countDistinct(comments.id) })
 				.from(comments)

@@ -33,7 +33,11 @@ const publicRoutes = new Hono<AppEnv>().get(
 		const offset = (page - 1) * limit;
 		const sortByColumn =
 			sortBy === "points" ? comments.points : comments.createdAt;
-		const sortOrder = order === "desc" ? desc(sortByColumn) : asc(sortByColumn);
+		const orderFn = order === "desc" ? desc : asc;
+		const sortOrder =
+			sortBy === "points"
+				? [orderFn(sortByColumn), desc(comments.createdAt)]
+				: [orderFn(sortByColumn)];
 		const { count } = await db
 			.select({ count: countDistinct(comments.id) })
 			.from(comments)

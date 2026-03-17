@@ -84,7 +84,7 @@ export function CommentThread({
 					</button>
 				</div>
 				{!isCollapsed && (
-					<>
+					<div className="ml-[0.25em]">
 						<p className="mb-2 text-foreground text-sm">{comment.content}</p>
 						<div className="flex items-center space-x-1 text-muted-foreground text-xs">
 							{currentUser && (
@@ -107,7 +107,7 @@ export function CommentThread({
 								/>
 							</div>
 						)}
-					</>
+					</div>
 				)}
 			</div>
 			{!isCollapsed &&
