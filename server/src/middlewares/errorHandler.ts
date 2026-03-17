@@ -2,6 +2,7 @@ import type { ApiError, ValidationError } from "@shared/types";
 import type { Context } from "hono";
 import { HTTPException } from "hono/http-exception";
 import { ZodError } from "zod";
+import { processEnv } from "@/lib/env";
 
 export const handleError = (err: Error, c: Context) => {
 	if (err instanceof ZodError) {
@@ -36,7 +37,7 @@ export const handleError = (err: Error, c: Context) => {
 		{
 			success: false,
 			message:
-				process.env.NODE_ENV === "development"
+				processEnv.NODE_ENV === "development"
 					? (err.stack ?? err.message)
 					: "Internal Server Error",
 		},

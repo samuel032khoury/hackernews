@@ -21,7 +21,7 @@ export const auth = betterAuth({
 		maxPasswordLength: PASSWORD_MAX_LENGTH,
 	},
 	plugins: [openAPI(), username()],
-	trustedOrigins: [processEnv.CLIENT_URL || ""],
+	trustedOrigins: [processEnv.CLIENT_URL],
 });
 
 export type Session = typeof auth.$Infer.Session.session;

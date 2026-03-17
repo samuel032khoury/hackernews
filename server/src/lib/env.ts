@@ -5,7 +5,14 @@ import type { Session, User } from "./auth";
 export const processEnv = z
 	.object({
 		DATABASE_URL: z.url(),
-		CLIENT_URL: z.url(),
+		BETTER_AUTH_URL: z.url(),
+		BETTER_AUTH_SECRET: z.string(),
+		CLIENT_URL: z.url().default("/"),
+		PORT: z.string().optional().default("3000"),
+		HOSTNAME: z.string().optional().default("localhost"),
+		NODE_ENV: z
+			.enum(["development", "production", "test"])
+			.default("development"),
 	})
 	.parse(process.env);
 

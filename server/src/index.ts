@@ -28,8 +28,8 @@ const app = new Hono()
 	.get("*", serveStatic({ root: "../client/dist", path: "index.html" }));
 
 export default {
-	port: process.env.PORT || 3000,
-	hostname: "0.0.0.0",
+	port: processEnv.PORT,
+	hostname: processEnv.HOSTNAME,
 	fetch: app.fetch,
 };
 export type AppType = typeof api;
