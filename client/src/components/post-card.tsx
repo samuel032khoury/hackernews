@@ -60,7 +60,13 @@ export const PostCard = ({ post }: { post: Post }) => {
 										to={`/`}
 										search={{ site: post.url }}
 									>
-										{new URL(post.url).hostname}
+										{(() => {
+										try {
+											return new URL(post.url!).hostname;
+										} catch {
+											return post.url;
+										}
+									})()}
 									</Link>
 								</Badge>
 							)}
@@ -93,8 +99,8 @@ export const PostCard = ({ post }: { post: Post }) => {
 								search={{ id: post.id }}
 								className="hover:text-foreground/80 hover:underline"
 							>
-								{post.commentsCount} comment
-								{post.commentsCount >= 1 ? "s" : ""}
+							{post.commentsCount} comment
+							{post.commentsCount > 1 ? "s" : ""}
 							</Link>
 						</div>
 					</CardDescription>
