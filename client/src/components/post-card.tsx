@@ -45,13 +45,13 @@ export const PostCard = ({ post }: { post: Post }) => {
 									{post.title}
 								</a>
 							) : (
-								<Link
-									to={`/post`}
-									search={{ id: post.id }}
-									className="text-foreground hover:text-primary hover:underline"
-								>
-									{post.title}
-								</Link>
+							<Link
+								to="/post/$id"
+								params={{ id: post.id.toString() }}
+								className="text-foreground hover:text-primary hover:underline"
+							>
+								{post.title}
+							</Link>
 							)}
 							{post.url && (
 								<Badge variant={"secondary"} asChild>
@@ -95,10 +95,10 @@ export const PostCard = ({ post }: { post: Post }) => {
 							<span>{relativeTime(post.createdAt)}</span>
 							<span>•</span>
 							<Link
-								to={`/post`}
-								search={{ id: post.id }}
-								className="hover:text-foreground/80 hover:underline"
-							>
+							to="/post/$id"
+							params={{ id: post.id.toString() }}
+							className="hover:text-foreground/80 hover:underline"
+						>
 							{post.commentsCount} comment
 							{post.commentsCount > 1 ? "s" : ""}
 							</Link>

@@ -4,11 +4,11 @@ import { PostCard } from "@/components/post-card";
 import { SortBar } from "@/components/sort-bar";
 import { Button } from "@/components/ui/button";
 import { postsInfiniteQueryOptions } from "@/services/posts";
-import { homeSearchSchema } from "@/validators/search.validation";
+import { searchSchema } from "@/validators/search.validation";
 
 export const Route = createFileRoute("/")({
 	component: Index,
-	validateSearch: homeSearchSchema,
+	validateSearch: searchSchema,
 	loaderDeps: ({ search }) => ({
 		sortBy: search.sortBy,
 		order: search.order,

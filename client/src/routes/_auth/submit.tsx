@@ -40,9 +40,9 @@ function Submit() {
 				await router.invalidate();
 				form.reset();
 				await router.navigate({
-					to: "/post",
+					to: "/post/$id",
 					replace: true,
-					search: { id: res.data.postId },
+					params: { id: String(res.data.postId) },
 				});
 				return;
 			} else {

@@ -9,7 +9,7 @@ import { LoadMoreRepliesButton } from "./load-more-replies-button";
 import { SortBar } from "./sort-bar";
 import { Card, CardContent } from "./ui/card";
 
-const postRouteApi = getRouteApi("/post");
+const postRouteApi = getRouteApi("/post/$id");
 
 export const PostCommentsSection = ({ postId }: { postId: string }) => {
 	const { sortBy, order } = postRouteApi.useSearch();
@@ -20,7 +20,7 @@ export const PostCommentsSection = ({ postId }: { postId: string }) => {
 		fetchNextPage,
 		isFetchingNextPage,
 	} = useSuspenseInfiniteQuery(
-		commentsInfiniteQueryOptions({ id: postId, sortBy, order }),
+		commentsInfiniteQueryOptions(postId, { sortBy, order }),
 	);
 	const { currentUser } = useCurrentUser();
 

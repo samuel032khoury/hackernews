@@ -6,14 +6,14 @@ import {
 import { notFound } from "@tanstack/react-router";
 import type z from "zod";
 import { api } from "@/lib/api";
-import type { homeSearchSchema } from "@/validators/search.validation";
+import type { searchSchema } from "@/validators/search.validation";
 
 export const postsInfiniteQueryOptions = ({
 	sortBy,
 	order,
 	author,
 	site,
-}: z.infer<typeof homeSearchSchema>) =>
+}: z.infer<typeof searchSchema>) =>
 	infiniteQueryOptions({
 		queryKey: ["posts", sortBy, order, author, site],
 		queryFn: ({ pageParam: page }) =>
@@ -41,7 +41,7 @@ export const postQueryOptions = (id: string) =>
 
 const getAllPosts = async (
 	page: number,
-	{ sortBy, order, author, site }: z.infer<typeof homeSearchSchema>,
+	{ sortBy, order, author, site }: z.infer<typeof searchSchema>,
 ) => {
 	const res = await api.posts.$get({
 		query: {

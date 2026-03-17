@@ -3,13 +3,12 @@ import type { paginationSchema } from "@shared/validators/search.validation";
 import { infiniteQueryOptions, keepPreviousData } from "@tanstack/react-query";
 import type z from "zod";
 import { api } from "@/lib/api";
-import type { postSearchSchema } from "@/validators/search.validation";
+import type { searchSchema } from "@/validators/search.validation";
 
-export const commentsInfiniteQueryOptions = ({
-	id,
-	sortBy,
-	order,
-}: z.infer<typeof postSearchSchema>) =>
+export const commentsInfiniteQueryOptions = (
+	id: string,
+	{ sortBy, order }: Pick<z.infer<typeof searchSchema>, "sortBy" | "order">,
+) =>
 	infiniteQueryOptions({
 		queryKey: ["comments", "post", id, sortBy, order],
 		queryFn: async ({ pageParam }) =>

@@ -4,26 +4,25 @@ import { PostCard } from "@/components/post-card";
 import { PostCommentsSection } from "@/components/post-comments-section";
 import { commentsInfiniteQueryOptions } from "@/services/comments";
 import { postQueryOptions } from "@/services/posts";
-import { postSearchSchema } from "@/validators/search.validation";
+import { searchSchema } from "@/validators/search.validation";
 
-export const Route = createFileRoute("/post")({
+export const Route = createFileRoute("/post/$id")({
 	component: Post,
-	validateSearch: postSearchSchema,
+	validateSearch: searchSchema,
 	loaderDeps: ({ search }) => ({
-		id: search.id,
 		sortBy: search.sortBy,
 		order: search.order,
 	}),
-	loader: async ({ context, deps: { id, sortBy, order } }) => {
+	loader: async ({ context, deps: { sortBy, order }, params: { id } }) => {
 		await context.queryClient.ensureQueryData(postQueryOptions(id));
 		await context.queryClient.ensureInfiniteQueryData(
-			commentsInfiniteQueryOptions({ id: id, sortBy, order }),
+			commentsInfiniteQueryOptions(id, { sortBy, order }),
 		);
 	},
 });
 
 function Post() {
-	const { id } = Route.useSearch();
+	const { id } = Route.useParams();
 	const { data } = useSuspenseQuery(postQueryOptions(id));
 	return (
 		<div className="mx-auto max-w-3xl">
