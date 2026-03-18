@@ -55,6 +55,7 @@ RUN --mount=type=cache,target=/root/.bun/install/cache \
 # Server dist (compiled entry) + src so Bun can resolve tsconfig path aliases (@/* → server/src) at runtime
 COPY --link --from=build /app/server/dist ./server/dist
 COPY --link --from=build /app/server/src ./server/src
+COPY --link --from=build /app/server/scripts ./server/scripts
 COPY --link --from=build /app/shared/src ./shared/src
 COPY --link --from=build /app/shared/dist ./shared/dist
 COPY --link --from=build /app/client/dist ./client/dist
