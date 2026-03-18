@@ -18,7 +18,7 @@
 		"dev": "bun --watch run src/index.ts && tsc --watch",
 		"build": "tsc -b",
 		"preview": "bun ./dist/src/index.js",
-		"start": "bun ./dist/src/index.js",
+		"start": "bun run db:migrate && bun ./dist/src/index.js",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
