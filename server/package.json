@@ -23,7 +23,8 @@
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
-		"clean": "rm -rf dist"
+		"clean": "rm -rf dist",
+		"eject": "rm -rf node_modules && rm -rf .turbo"
 	},
 	"dependencies": {
 		"@hono/zod-validator": "^0.7.5",

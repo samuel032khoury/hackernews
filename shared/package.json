@@ -6,6 +6,7 @@
 	"scripts": {
 		"build": "tsc",
 		"dev": "tsc --watch --noEmit",
-		"clean": "rm -rf dist"
+		"clean": "rm -rf dist",
+		"eject": "rm -rf node_modules && rm -rf .turbo"
 	}
 }

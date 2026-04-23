@@ -24,7 +24,8 @@
 		"type-check": "turbo type-check",
 		"test": "turbo test",
 		"clean": "turbo clean",
-		"eject": "rm -rf node_modules && rm -rf .turbo"
+		"eject": "turbo eject",
+		"posteject": "rm -rf node_modules && rm -rf .turbo"
 	},
 	"dependencies": {
 		"hono": "^4.7.11",

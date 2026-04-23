@@ -98,6 +98,9 @@
 		},
 		"clean": {
 			"cache": false
+		},
+		"eject": {
+			"cache": false
 		}
 	},
 	"globalDependencies": [
